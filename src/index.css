@@ -1,0 +1,15 @@
+:root {
+  color-scheme: dark;
+  font: 16px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  background: #05070f;
+  color: #ffffff;
+}
+
+#root {
+  min-height: 100vh;
+}
