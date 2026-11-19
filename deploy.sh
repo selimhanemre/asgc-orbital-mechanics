@@ -21,6 +21,7 @@ npm run build
 
 echo "==> Creating deploy commit from dist/ ..."
 index_file=$(mktemp)
+rm -f "$index_file" # git wants a non-existent path, not a 0-byte file
 tree_file=$(mktemp)
 trap 'rm -f "$index_file" "$tree_file"' EXIT
 
