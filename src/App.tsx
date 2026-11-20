@@ -183,6 +183,7 @@ function App() {
             key={m}
             className={`view-btn ${state.viewMode === m ? 'active' : ''}`}
             aria-pressed={state.viewMode === m}
+            aria-label={`View mode: ${m === 'both' ? 'Top and Side' : m === 'top' ? 'Top-down only' : 'Side view only'}`}
             onClick={() => dispatch({ type: 'setViewMode', mode: m })}
             data-mode={m}
           >
@@ -227,6 +228,7 @@ function App() {
                 key={s}
                 className={`speed-btn ${state.timeScale === s ? 'active' : ''}`}
                 aria-pressed={state.timeScale === s}
+                aria-label={`Speed: ${s}x`}
                 onClick={() => dispatch({ type: 'setTimeScale', ts: s })}
               >
                 {s}×
@@ -241,7 +243,11 @@ function App() {
             <div className="param" key={d.key}>
               <div className="param-head">
                 <label htmlFor={`param-${d.key}`}>{d.label}</label>
-                <output className="param-value" htmlFor={`param-${d.key}`}>
+                <output
+                  htmlFor={`param-${d.key}`}
+                  className="param-value"
+                  aria-live="polite"
+                >
                   {Math.round(state.params[d.key]).toLocaleString('en-US')}{d.unit ? ` ${d.unit}` : ''}
                 </output>
               </div>
@@ -253,6 +259,7 @@ function App() {
                 step={d.step}
                 value={state.params[d.key]}
                 onChange={(e) => handleParam(d.key, Number(e.target.value))}
+                aria-label={`${d.label}: ${Math.round(state.params[d.key]).toLocaleString('en-US')}${d.unit ? ` ${d.unit}` : ''}`}
               />
             </div>
           ))}
