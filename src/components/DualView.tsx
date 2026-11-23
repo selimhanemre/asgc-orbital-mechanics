@@ -1,6 +1,6 @@
-// DualView: two synchronized canvases (top-down + side) driven by one
-// requestAnimationFrame loop. React never re-renders per frame — the draw
-// closure is read through a ref so slider changes take effect immediately.
+// DualView: the single top-down canvas driven by one requestAnimationFrame
+// loop. React never re-renders per frame — the draw closure is read through
+// a ref so slider changes take effect immediately.
 // The simulation clock lives in a parent-owned ref so module buttons
 // (e.g. burns) can read the exact phase at click time.
 
@@ -28,12 +28,13 @@ interface DualViewProps {
 }
 
 export default function DualView(props: DualViewProps): React.JSX.Element {
-  const topCanvas = useRef<HTMLCanvasElement | null>(null)
-  const sideCanvas = useRef<HTMLCanvasElement | null>(null)
-  const infosRef = useRef<Array<{ ctx: CanvasRenderingContext2D | null; w: number; h: number; dpr: number }>>([
-    { ctx: null, w: 0, h: 0, dpr: 1 },
-    { ctx: null, w: 0, h: 0, dpr: 1 },
-  ])
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const infoRef = useRef<{ ctx: CanvasRenderingContext2D | null; w: number; h: number; dpr: number }>({
+    ctx: null,
+    w: 0,
+    h: 0,
+    dpr: 1,
+  })
 
   const propsRef = useRef(props)
   propsRef.current = props
@@ -45,23 +46,20 @@ export default function DualView(props: DualViewProps): React.JSX.Element {
 
   // Canvas sizing: DPR-aware, observed on resize.
   useEffect(() => {
-    const canvasEls = [topCanvas.current, sideCanvas.current]
-    const infos = infosRef.current
+    const el = canvasRef.current
+    if (!el) return
     const sizeAll = () => {
-      canvasEls.forEach((el, i) => {
-        if (!el) return
-        const dpr = Math.min(2, window.devicePixelRatio || 1)
-        const rect = el.getBoundingClientRect()
-        const w = Math.max(80, Math.floor(rect.width))
-        const h = Math.max(80, Math.floor(rect.height))
-        el.width = Math.floor(w * dpr)
-        el.height = Math.floor(h * dpr)
-        infos[i] = { ctx: el.getContext('2d'), w, h, dpr }
-      })
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      const rect = el.getBoundingClientRect()
+      const w = Math.max(80, Math.floor(rect.width))
+      const h = Math.max(80, Math.floor(rect.height))
+      el.width = Math.floor(w * dpr)
+      el.height = Math.floor(h * dpr)
+      infoRef.current = { ctx: el.getContext('2d'), w, h, dpr }
     }
     sizeAll()
     const ro = new ResizeObserver(sizeAll)
-    canvasEls.forEach((el) => el && ro.observe(el))
+    ro.observe(el)
     window.addEventListener('resize', sizeAll)
     return () => {
       ro.disconnect()
@@ -80,23 +78,15 @@ export default function DualView(props: DualViewProps): React.JSX.Element {
       if (P.playing && !P.reducedMotion) {
         P.timeRef.current += dt * P.timeScale
       }
-      const infos = infosRef.current
-      const mkInfo = (i: number): CanvasInfo | null => {
-        const info = infos[i]
-        if (!info.ctx || info.w < 20) return null
+      const info = infoRef.current
+      if (info.ctx && info.w >= 20) {
         const ctx = info.ctx
         ctx.setTransform(info.dpr, 0, 0, info.dpr, 0, 0)
-        return { ctx, w: info.w, h: info.h }
-      }
-      const top = mkInfo(0)
-      const side = mkInfo(1)
-      if (top && side) {
+        const top: CanvasInfo = { ctx, w: info.w, h: info.h }
         drawSpaceBackground(top)
-        drawSpaceBackground(side, 11)
         drawRef.current(
           {
             top,
-            side,
             time: P.timeRef.current,
             unit: P.unit,
             playing: P.playing,
@@ -127,18 +117,10 @@ export default function DualView(props: DualViewProps): React.JSX.Element {
     <div className="dualview">
       <div className="dualview-pane">
         <canvas
-          ref={topCanvas}
+          ref={canvasRef}
           className="sim-canvas"
           role="img"
           aria-label="Top-down orbital view"
-        />
-      </div>
-      <div className="dualview-pane">
-        <canvas
-          ref={sideCanvas}
-          className="sim-canvas"
-          role="img"
-          aria-label="Side orbital view"
         />
       </div>
     </div>

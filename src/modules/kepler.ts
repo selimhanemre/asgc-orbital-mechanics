@@ -8,7 +8,7 @@ import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
   drawEarth, drawOrbitPath, fillSweptSector, drawCraft, drawLabel, drawViewTag,
-  drawMarker, drawInfoBox,
+  drawMarker,
 } from '../sim/scene'
 
 const defaults: Params = { a: 12000, e: 0.3 }
@@ -58,7 +58,6 @@ export const module: ModuleDef = {
     const T = periodFromSemiMajor(a)
     const maxR = a * (1 + e)
     const topV = makeView(inp.top, maxR)
-    const sideV = makeView(inp.side, maxR)
 
     const M = meanAnomaly(inp.time, T)
     const E0 = solveKepler(M, e)
@@ -86,18 +85,5 @@ export const module: ModuleDef = {
     drawMarker(inp.top, topV.cx - a * (1 + e) * topV.scale, topV.cy, 'APO', '#ffd60a')
     drawLabel(inp.top, '⊕', topV.cx - 8, topV.cy, { color: '#4dd0e1', size: 14 })
     drawViewTag(inp.top, 'TOP-DOWN')
-
-    // SIDE VIEW
-    drawEarth(inp.side, sideV.cx, sideV.cy, Math.max(5, 6371 * sideV.scale), 0.5)
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, a, e, { color: '#4dd0e1' })
-    const sSx = sideV.cx + r0 * sideV.scale * Math.cos(nu0)
-    const sSy = sideV.cy + r0 * sideV.scale * Math.sin(nu0) * 0.5
-    drawCraft(inp.side, sSx, sSy, nu0 + Math.PI / 2)
-    drawInfoBox(inp.side, 14, 48, [
-      { label: 'a', value: `${Math.round(a).toLocaleString()} km` },
-      { label: 'e', value: e.toFixed(2) },
-      { label: 'T', value: `${(T / 60).toFixed(1)} min` },
-    ])
-    drawViewTag(inp.side, 'SIDE VIEW')
   },
 }

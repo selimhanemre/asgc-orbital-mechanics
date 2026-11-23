@@ -70,7 +70,6 @@ export const module: ModuleDef = {
     const T = periodFromSemiMajor(a)
     const maxR = a * (1 + e)
     const topV = makeView(inp.top, maxR)
-    const sideV = makeView(inp.side, maxR)
 
     const M = meanAnomaly(inp.time, T)
     const E0 = solveKepler(M, e)
@@ -105,14 +104,5 @@ export const module: ModuleDef = {
     drawMarker(inp.top, topV.cx - apoR * topV.scale, topV.cy, `APO ${(apoR - 6371).toFixed(0)}`, '#ffd60a')
     drawLabel(inp.top, '⊕', topV.cx - 8, topV.cy, { color: '#4dd0e1', size: 14 })
     drawViewTag(inp.top, 'TOP-DOWN')
-
-    // SIDE VIEW
-    drawEarth(inp.side, sideV.cx, sideV.cy, Math.max(5, 6371 * sideV.scale), 0.5)
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, a, e, { color: '#4dd0e1' })
-    const sSx = sideV.cx + r0 * sideV.scale * Math.cos(nu0)
-    const sSy = sideV.cy + r0 * sideV.scale * Math.sin(nu0) * 0.5
-    drawCraft(inp.side, sSx, sSy, nu0 + Math.PI / 2)
-    drawLabel(inp.side, '☀ SUN →', sideV.cx + sideV.scale * maxR + 20, sideV.cy, { color: '#ffd60a', size: 14 })
-    drawViewTag(inp.side, 'SIDE VIEW')
   },
 }

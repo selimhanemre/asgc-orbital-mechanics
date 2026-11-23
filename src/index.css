@@ -25,7 +25,7 @@ body {
   height: 100vh;
 }
 
-/* DualView layout */
+/* Stage: single top-down canvas (one flex pane fills the stage) */
 .dualview {
   display: flex;
   gap: 12px;

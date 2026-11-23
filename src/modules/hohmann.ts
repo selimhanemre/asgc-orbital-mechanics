@@ -104,16 +104,5 @@ export const module: ModuleDef = {
       { label: 't transfer', value: `${(tTransfer / 60).toFixed(1)} min` },
     ])
     drawViewTag(inp.top, 'TOP-DOWN')
-
-    const sideV = makeView(inp.side, maxR)
-    drawEarth(inp.side, sideV.cx, sideV.cy, Math.max(5, 6371 * sideV.scale), 0.5)
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, r1, 0, { color: '#4dd0e1' })
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, r2, 0, { color: '#4dd0e1' })
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, aT, eT, { color: '#ffb300', dashed: true, width: 3 })
-    drawCraft(inp.side, sx, sideV.cy + (sy - topV.cy) * 0.5, nu + Math.PI / 2)
-    drawLabel(inp.side, 'BURN 1', topV.cx + r1 * topV.scale + 8, topV.cy + 20, { color: '#ffb300', size: 14, bold: true })
-    drawLabel(inp.side, 'BURN 2', topV.cx - r2 * topV.scale - 35, topV.cy + 20, { color: '#ffb300', size: 14, bold: true })
-    drawLabel(inp.side, '☀ SUN →', sideV.cx + sideV.scale * maxR + 20, sideV.cy, { color: '#ffd60a', size: 14 })
-    drawViewTag(inp.side, 'SIDE VIEW')
   },
 }

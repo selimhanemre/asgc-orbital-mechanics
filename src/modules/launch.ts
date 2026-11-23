@@ -7,7 +7,7 @@ import { periodFromSemiMajor, elementsFromState, applyImpulse, circularState } f
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawMarker, drawInfoBox,
+  drawEarth, drawOrbitPath, drawCraft, drawViewTag, drawMarker, drawInfoBox,
 } from '../sim/scene'
 
 const defaults: Params = { dv: 0.5, prograde: 1 }
@@ -60,7 +60,6 @@ export const module: ModuleDef = {
     const rMag = Math.hypot(_state.r.x, _state.r.y)
     const maxR = el.apo !== null ? el.apo : Math.max(rMag * 1.5, 20000)
     const topV = makeView(inp.top, maxR)
-    const sideV = makeView(inp.side, maxR)
 
     // Ghost orbits
     for (const ghost of _ghostOrbits) {
@@ -104,14 +103,5 @@ export const module: ModuleDef = {
       { label: 'Δv used', value: `${_cumulativeDv.toFixed(2)} km/s`, color: '#ffd60a' },
     ])
     drawViewTag(inp.top, 'TOP-DOWN')
-
-    // SIDE VIEW
-    drawEarth(inp.side, sideV.cx, sideV.cy, Math.max(5, 6371 * sideV.scale), 0.5)
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, orbitR, orbitE, { color: '#4dd0e1' })
-    const sSx = sideV.cx + rMag * sideV.scale * Math.cos(nu)
-    const sSy = sideV.cy + rMag * sideV.scale * Math.sin(nu) * 0.5
-    drawCraft(inp.side, sSx, sSy, heading + Math.PI / 2)
-    drawLabel(inp.side, '☀ SUN →', sideV.cx + sideV.scale * maxR + 20, sideV.cy, { color: '#ffd60a', size: 14 })
-    drawViewTag(inp.side, 'SIDE VIEW')
   },
 }

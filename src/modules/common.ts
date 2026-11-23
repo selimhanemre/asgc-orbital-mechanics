@@ -32,13 +32,12 @@ export interface View {
   scale: number
   cx: number
   cy: number
-  squash: number
-  /** km -> canvas px (side view applies the perspective squash) */
+  /** km -> canvas px */
   X: (xKm: number, yKm: number) => readonly [number, number]
 }
 
 /** Build a view mapping for one canvas. rMaxKm = largest radius to fit. */
-export function makeView(c: CanvasInfo, rMaxKm: number, squash = 1): View {
+export function makeView(c: CanvasInfo, rMaxKm: number): View {
   const scale = fitScale(c.w, c.h, rMaxKm)
   const cx = c.w / 2
   const cy = c.h / 2
@@ -47,8 +46,7 @@ export function makeView(c: CanvasInfo, rMaxKm: number, squash = 1): View {
     scale,
     cx,
     cy,
-    squash,
-    X: (xKm, yKm) => [cx + xKm * scale, cy + yKm * scale * squash],
+    X: (xKm, yKm) => [cx + xKm * scale, cy + yKm * scale],
   }
 }
 
@@ -56,10 +54,9 @@ export function makeView(c: CanvasInfo, rMaxKm: number, squash = 1): View {
 export function drawBaseScene(
   v: View,
   orbit: { a: number; e: number; color?: string; dashed?: boolean; width?: number },
-  opts: { earthSquash?: number } = {},
 ): void {
   const earthPx = Math.max(5, R_EARTH_PX(v))
-  drawEarth(v.c, v.cx, v.cy, earthPx, opts.earthSquash ?? 1)
+  drawEarth(v.c, v.cx, v.cy, earthPx)
   drawOrbitPath(v.c, v.cx, v.cy, v.scale, orbit.a, orbit.e, {
     color: orbit.color,
     dashed: orbit.dashed,

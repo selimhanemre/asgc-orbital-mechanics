@@ -44,17 +44,13 @@ export function drawSpaceBackground(c: CanvasInfo, seed = 7): void {
 
 /**
  * Stylized canvas-drawn Earth (no external assets).
- * rPx = pixel radius. `squash` < 1 gives the side view a perspective tilt.
+ * rPx = pixel radius (north-polar top-down view).
  */
-export function drawEarth(c: CanvasInfo, cx: number, cy: number, rPx: number, squash = 1): void {
+export function drawEarth(c: CanvasInfo, cx: number, cy: number, rPx: number): void {
   const { ctx } = c
   if (rPx < 1) return
-  const { w, h } = c
-  void w
-  void h
   ctx.save()
   ctx.translate(cx, cy)
-  ctx.scale(1, squash)
   // atmospheric glow
   const glow = ctx.createRadialGradient(0, 0, rPx * 0.8, 0, 0, rPx * 1.35)
   glow.addColorStop(0, 'rgba(90,160,255,0.30)')
@@ -306,7 +302,7 @@ export function drawInfoBox(
   ctx.restore()
 }
 
-/** View tag ("TOP VIEW" / "SIDE VIEW") in the corner. */
+/** View tag ("TOP-DOWN") in the corner. */
 export function drawViewTag(c: CanvasInfo, text: string): void {
   drawLabel(c, text, 14, 18, { color: '#8fa3cc', size: 13, bold: true })
 }

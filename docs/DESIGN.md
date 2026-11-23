@@ -9,9 +9,9 @@ Reference mockups (rendered at exact target viewports):
 
 | File | Viewport | Shows |
 |---|---|---|
-| [`mockups/mockup-desktop-kepler.png`](mockups/mockup-desktop-kepler.png) | 1366×768 | Full app shell, Module 1 (Kepler) active, dual canvas, bottom dock |
+| [`mockups/mockup-desktop-kepler.png`](mockups/mockup-desktop-kepler.png) | 1366×768 | Full app shell, Module 1 (Kepler) active, top-down canvas, bottom dock |
 | [`mockups/mockup-desktop-hohmann.png`](mockups/mockup-desktop-hohmann.png) | 1366×768 | Module 5 (Hohmann): transfer ellipse, burn arrows, Δv readouts |
-| [`mockups/mockup-narrow-circular.png`](mockups/mockup-narrow-circular.png) | 480×768 | Narrow layout: stacked views, view toggle, Module 2 (Circular) |
+| [`mockups/mockup-narrow-circular.png`](mockups/mockup-narrow-circular.png) | 480×768 | Narrow layout: single top-down canvas, Module 2 (Circular) |
 
 ---
 
@@ -34,11 +34,10 @@ Reference mockups (rendered at exact target viewports):
 │ HEADER 60px │ wordmark · module tabs (6) · unit toggle (km/s|km/min)│
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
-│  STAGE  flex-1 (580px @768)   padding 12 · gap 12                  │
-│  ┌──────────────────────────┐  ┌──────────────────────────┐        │
-│  │ CANVAS TOP-DOWN  (665px) │  │ CANVAS SIDE VIEW (665px) │        │
-│  │ badge · scale bar        │  │ badge · scale bar · SUN  │        │
-│  └──────────────────────────┘  └──────────────────────────┘        │
+│  STAGE  flex-1 (580px @768)   padding 12                           │
+│  ┌──────────────────────────────────────────────────────────┐      │
+│  │ CANVAS TOP-DOWN  (1342px) — badge · scale bar            │      │
+│  └──────────────────────────────────────────────────────────┘      │
 │                                                                    │
 ├────────────────────────────────────────────────────────────────────┤
 │ DOCK 128px │ transport (238) · module sliders (flex) · readouts    │
@@ -46,25 +45,25 @@ Reference mockups (rendered at exact target viewports):
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Vertical budget @ **1366×768**: 60 + 580 + 128 = 768 exactly. Canvas cards: (1366 − 2×12 padding − 12 gap) / 2 = **665 × 556** inside 12 px padding + 10 px radius cards.
+Vertical budget @ **1366×768**: 60 + 580 + 128 = 768 exactly. Canvas card: 1366 − 2×12 padding = **1342 × 556** inside 12 px padding + 10 px radius card.
 
 - **Header (60 px):** wordmark left, tab bar center (flex, `margin: 0 auto`), unit toggle right.
-- **Stage (flex-1):** two equal flex cards, side by side, gap 12 px, padding 12 px. Each card is a borderless canvas fill; badge and scale bar are canvas-drawn (not DOM), so they scale with the canvas.
+- **Stage (flex-1):** one full-width canvas card (top-down view only; the side view was removed — see §2.3). The card is a borderless canvas fill; badge and scale bar are canvas-drawn (not DOM), so they scale with the canvas.
 - **Dock (128 px):** three zones left→right — transport (fixed 238 px), module sliders (flex), readout grid (fixed 330 px, 3×2 chips).
 
 ### 2.2 Breakpoints (exact)
 
 | Range | Name | Canvas arrangement | Dock | Tabs |
 |---|---|---|---|---|
-| **≥ 1200 px** | desktop | side-by-side, equal width | one row, 3 zones (128 px) | number + full label, 14 px |
-| **800–1199 px** | tablet | side-by-side, equal width | two rows (min 156 px): row 1 = transport + readouts, row 2 = full-width sliders | number + short label |
-| **360–799 px** | narrow | **stacked**: top-down above side view; **view toggle** (Both / Top / Side) appears above the stage; “Both” = 50/50 stage split, single = selected canvas fills stage | 170 px: row 1 transport, row 2 slider(s), row 3 readouts (3 chips) | horizontal, number + 3–6 char label, 11 px, scrollable if < 6 fit |
+| **≥ 1200 px** | desktop | single top-down canvas, full width | one row, 3 zones (128 px) | number + full label, 14 px |
+| **800–1199 px** | tablet | single top-down canvas, full width | two rows (min 156 px): row 1 = transport + readouts, row 2 = full-width sliders | number + short label |
+| **360–799 px** | narrow | single top-down canvas fills the stage | 170 px: row 1 transport, row 2 slider(s), row 3 readouts (3 chips) | horizontal, number + 3–6 char label, 11 px, scrollable if < 6 fit |
 
 Media queries to use: `@media (min-width: 1200px)`, `@media (min-width: 800px) and (max-width: 1199.98px)`, `@media (max-width: 799.98px)`. Minimum supported width **360 px**. No horizontal scroll at any supported size.
 
-### 2.3 View toggle (narrow only)
+### 2.3 Views (single top-down)
 
-Segmented control, full width, 34 px tall: `Both | Top | Side`. Default **Both**. “Top”/“Side” give one canvas the full stage (useful when the teacher wants a single big view on a phone/tablet). Keyboard: it is a native `role=group` of buttons, arrow-key navigable.
+The app shows **one view only: top-down (north-polar)**. The former side (equatorial) view and the narrow-only Both / Top / Side view toggle were removed; no view-mode state or control exists. A side view (or a dedicated M4 graph canvas) may return in a later iteration.
 
 ---
 
@@ -119,7 +118,7 @@ Dark space theme. All text/pair combinations below were computed; weakest pair i
 
 | Label | Size / weight |
 |---|---|
-| View badge (“TOP-DOWN” / “SIDE VIEW”) | 18 px / 700, letter-spacing 1.5 px, in pill `#131A2E` @85% |
+| View badge (“TOP-DOWN”) | 18 px / 700, letter-spacing 1.5 px, in pill `#131A2E` @85% |
 | Apogee / perigee / burn labels | 16 px / 700 mono |
 | Live “v = …” label at spacecraft | 16 px / 700 mono `--yellow` |
 | “A₁ = A₂” annotation | 16 px / 600 |
@@ -132,7 +131,7 @@ Hard floor: **no canvas label below 14 px**, no key value below 16 px. Canvas te
 
 - Spacing scale: 4 / 8 / 12 / 16 / 24 px.
 - Radii: cards 10, buttons 10, chips/tabs/segments 8.
-- **Touch/keyboard target minimum 44×44 px** for every interactive control (buttons, speed segments, unit buttons, view toggle).
+- **Touch/keyboard target minimum 44×44 px** for every interactive control (buttons, speed segments, unit buttons).
 - Focus style: `outline: 3px solid var(--cyan); outline-offset: 2px` on all focusable elements.
 
 ---
@@ -147,7 +146,7 @@ Hard floor: **no canvas label below 14 px**, no key value below 16 px. Canvas te
 
 ### Per-module panel specification
 
-Each module defines: sliders (in dock center), readout chips (dock right, 6 slots), canvas annotations (both views), and one hint line. Defaults are chosen to be physically illustrative.
+Each module defines: sliders (in dock center), readout chips (dock right, 6 slots), canvas annotations (top-down view), and one hint line. Defaults are chosen to be physically illustrative.
 
 **M1 — Kepler’s Laws** (mockup: desktop-kepler)
 - Sliders: `a` 7,000–42,000 km, step 100, default 12,000 · `e` 0–0.5, step 0.01, default 0.30.
@@ -164,18 +163,18 @@ Each module defines: sliders (in dock center), readout chips (dock right, 6 slot
 **M3 — Elliptical Orbits**
 - Sliders: `a` 7,000–42,000 km, step 100, default 24,395 · `e` 0–0.95, step 0.01, default 0.30, **clamped so perigee ≥ 200 km** (i.e. `e ≤ 1 − (R⊕+200)/a`; thumb stops and value shows the clamp).
 - Readouts: `altitude (live)` · `r (live)` · `v (live)` · `apogee` · `perigee` · `T`.
-- Canvas: ellipse with focus cross; APOGEE/PERIGEE markers with altitude labels (side view); live v label grows/shrinks visibly near perigee/apogee.
+- Canvas: ellipse with focus cross; APOGEE/PERIGEE markers with altitude labels; live v label grows/shrinks visibly near perigee/apogee.
 - Hint: “Fastest at perigee, slowest at apogee — watch v change.”
 
 **M4 — Altitude–Period**
-- Sliders: none — the **side-view canvas becomes the graph**: T (min) vs altitude (0–40,000 km) with grid lines, curve `T = 2π√((R⊕+h)³/μ)`; a draggable point (mouse/touch, arrow keys = 100 km, Shift = 1,000 km). **Top-down canvas shows the live orbit** matching the point. Preset chips: LEO 400 · MEO 20,000 · GEO 35,786 (snap).
+- Sliders: none — **the top-down canvas carries the graph as a top-right inset panel**: T (min) vs altitude (0–40,000 km) with grid lines, curve `T = 2π√((R⊕+h)³/μ)`, and a glowing point tracking the current altitude. The live orbit matching the point is drawn alongside. **Known follow-up:** restore a dedicated graph canvas (the former side-view slot). Preset chips: LEO 400 · MEO 20,000 · GEO 35,786 (snap).
 - Readouts: `altitude` · `T` · `r` · `v` · (2 empty slots show `a` and a “T ∝ a^1.5” invariant note).
 - Hint: “Drag the dot up the curve — double the radius, more than double the time.”
 
 **M5 — Hohmann Transfer** (mockup: desktop-hohmann)
 - Sliders: `start altitude` 200–35,000 km, log, default 400 · `target altitude` 300–36,000 km, log, default 35,786. Constraint `target ≥ start + 100 km` enforced by auto-clamp with an amber warning chip.
 - Readouts: `Δv₁` · `Δv₂` · **`Total Δv` (yellow)** · `transfer time` · `v start` · `v target`.
-- Canvas: two cyan circles + dashed amber transfer ellipse; amber prograde burn arrows at both ends labeled Δv₁/Δv₂ (top-down) and BURN 1/BURN 2 (side); transfer-time label at the transfer ellipse’s midpoint; spacecraft animates circle → arc → circle over the transfer duration.
+- Canvas: two cyan circles + dashed amber transfer ellipse; amber prograde burn arrows at both ends labeled Δv₁/Δv₂; transfer-time label at the transfer ellipse’s midpoint; spacecraft animates circle → arc → circle over the transfer duration.
 - Hint: “Two small pushes beat one big one — see the total Δv.”
 
 **M6 — Launch / Insertion**
@@ -221,23 +220,23 @@ Chips: 8 px radius, `--bg-panel` on a slightly darker `#0E1526` fill, key (11 px
 
 ## 6. Canvas visual style
 
-Both canvases share one coordinate pipeline: scene centered on Earth at (W/2, H/2). Zoom is **adaptive**: `scale = 0.8 × min(W,H)/2 ÷ r_max` where `r_max` is the largest radius in the scene (apogee for M1/M3, outer circle for M5, orbit radius for M2, etc.). Earth is drawn at `6371 km × scale` — **always to scale against the orbit**; only zoom changes.
+The canvas (single top-down view) uses one coordinate pipeline: scene centered on Earth at (W/2, H/2). Zoom is **adaptive**: `scale = 0.8 × min(W,H)/2 ÷ r_max` where `r_max` is the largest radius in the scene (apogee for M1/M3, outer circle for M5, orbit radius for M2, etc.). Earth is drawn at `6371 km × scale` — **always to scale against the orbit**; only zoom changes.
 
 ### 6.1 Starfield
 
 ~20 static 1 px dots, white @25%, fixed seeded positions per canvas (no twinkle, no parallax — cheap and calm under `prefers-reduced-motion`).
 
-### 6.2 Earth conventions
+### 6.2 Earth conventions (top-down, north polar)
 
-| | **Top-down (north polar)** | **Side (equatorial)** |
-|---|---|---|
-| Base disk | `#2D7DD2` | `#2D7DD2` |
-| Continents | 4–6 stylized `#7BC67E` blobs (fixed canvas paths) | same, equatorial subset |
-| Graticule | circles at 30°/60° lat (r·cos30, r·cos60) + 6 meridian diameters, white 1 px @22% | equator line white @22% |
-| Orientation mark | “N” 14 px bold at top | — |
-| Terminator | **none** (polar view, sun direction irrelevant) | **yes**: left half `#05070F` @55% + 14 px soft band; terminator line white @30%; “SUN” + yellow left-pointing arrow at right edge |
-| Atmosphere | rim 2 px `#5B9BF8` @40% at R+2, 6 px halo @12% at R+5 | same |
-| Simplification | if screen R⊕ < 28 px: solid ocean disk + rim only (no continents/graticule) | same |
+| Element | Style |
+|---|---|
+| Base disk | `#2D7DD2` |
+| Continents | 4–6 stylized `#7BC67E` blobs (fixed canvas paths) |
+| Graticule | circles at 30°/60° lat (r·cos30, r·cos60) + 6 meridian diameters, white 1 px @22% |
+| Orientation mark | “N” 14 px bold at top |
+| Terminator | **none** (polar view, sun direction irrelevant) |
+| Atmosphere | rim 2 px `#5B9BF8` @40% at R+2, 6 px halo @12% at R+5 |
+| Simplification | if screen R⊕ < 28 px: solid ocean disk + rim only (no continents/graticule) |
 
 ### 6.3 Spacecraft & vectors
 
@@ -257,11 +256,11 @@ Both canvases share one coordinate pipeline: scene centered on Earth at (W/2, H/
 | Apogee/perigee/burn-position marker | 4 px `--yellow` disk + 16 px mono label |
 | Graph point (M4) | 10 px `--yellow` disk, 2 px white stroke; curve `--cyan` 3 px; grid white @12% |
 
-### 6.5 Per-canvas chrome (canvas-drawn, scales with canvas)
+### 6.5 Canvas chrome (canvas-drawn, scales with canvas)
 
-- **Badge** top-left: pill 32 px tall, 14 px/1.5 px letter-spacing, “TOP-DOWN” / “SIDE VIEW” (18 px; 14 px on narrow).
+- **Badge** top-left: pill 32 px tall, 14 px/1.5 px letter-spacing, “TOP-DOWN” (18 px; 14 px on narrow).
 - **Scale bar** bottom-left: 3 px white line with end ticks + 14 px mono caption; auto length from {500, 1,000, 2,000, 5,000, 10,000, 20,000} km so it renders 80–160 px.
-- Canvas element: `role="img"` with `aria-label` refreshed at 1 Hz summarizing state (“Side view: circular orbit, altitude 400 km, velocity 7.67 km per second, period 92 minutes.”). All numeric data is also mirrored in DOM chips, so screen readers never depend on the canvas.
+- Canvas element: `role="img"` with `aria-label` refreshed at 1 Hz summarizing state (“Top-down view: circular orbit, altitude 400 km, velocity 7.67 km per second, period 92 minutes.”). All numeric data is also mirrored in DOM chips, so screen readers never depend on the canvas.
 
 ---
 
@@ -308,7 +307,7 @@ Both canvases share one coordinate pipeline: scene centered on Earth at (W/2, H/
 
 ## 10. Performance & implementation notes
 
-- **Canvas:** two `<canvas>` elements, DPR = `min(devicePixelRatio, 2)`, sized by `ResizeObserver`; all drawing in one `draw(ctx, state)` per canvas inside a single rAF loop. Budget: ellipse + disk + ≤ 60 primitives — trivial for Canvas 2D at 1366×768; 60 fps target.
+- **Canvas:** one `<canvas>` element (top-down), DPR = `min(devicePixelRatio, 2)`, sized by `ResizeObserver`; all drawing in one `draw(ctx, state)` per frame inside a single rAF loop. Budget: ellipse + disk + ≤ 60 primitives — trivial for Canvas 2D at 1366×768; 60 fps target.
 - **React:** owns controls/state only; renders on control changes; readout DOM throttled to 10 Hz. No state in the rAF loop (refs).
 - **Physics:** pure-TS `sim-engine` module (per SPEC, unit-testable); renderer consumes closed-form state `(module, params, t)`.
 - **Offline:** system fonts only, no images, no fetch — consistent with SPEC §Zero network deps.
@@ -321,9 +320,7 @@ App
 │  ├─ ModuleTabs (roving tabindex, 1–6 keys)
 │  └─ UnitToggle (km/s | km/min, key U)
 ├─ Stage
-│  ├─ ViewToggle            (narrow only: Both | Top | Side)
-│  ├─ CanvasCard "top"      (canvas + 1 Hz aria-label)
-│  └─ CanvasCard "side"
+│  └─ CanvasCard "top"      (canvas + 1 Hz aria-label)
 └─ ControlDock
    ├─ TransportGroup (play/pause, step±, reset, speed segments)
    ├─ ModuleSliders (per §4)

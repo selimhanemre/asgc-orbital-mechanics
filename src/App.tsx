@@ -2,17 +2,16 @@
  * ASGC Orbital Mechanics — Main Application
  *
  * Header: wordmark · module tabs (1–6) · unit toggle
- * Stage: DualView component (top-down + side, synchronized rAF)
+ * Stage: DualView component (single top-down canvas, rAF)
  * Dock: transport · sliders · readout grid
  */
 
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import './App.css'
-import type { Unit, ReadoutLine } from './modules/types'
-import type { CanvasInfo } from './sim/scene'
-import { drawSpaceBackground } from './sim/scene'
+import type { Unit, ReadoutLine, DrawInput } from './modules/types'
 import { modules } from './modules'
 import { launchApplyBurn } from './modules/launch'
+import DualView from './components/DualView'
 
 /* ── constants ─────────────────────────────────────────────────────── */
 const TIME_SCALES = [0.5, 1, 2, 5, 10]
@@ -25,7 +24,6 @@ interface State {
   playing: boolean
   timeScale: number
   params: Params
-  viewMode: 'both' | 'top' | 'side'
   stepSignal: number
   resetSignal: number
 }
@@ -36,7 +34,6 @@ type Action =
   | { type: 'togglePlay' }
   | { type: 'setTimeScale'; ts: number }
   | { type: 'setParams'; params: Params }
-  | { type: 'setViewMode'; mode: 'both' | 'top' | 'side' }
   | { type: 'stepForward' }
   | { type: 'stepBack' }
   | { type: 'reset' }
@@ -51,7 +48,6 @@ function reducer(state: State, action: Action): State {
     case 'togglePlay': return { ...state, playing: !state.playing }
     case 'setTimeScale': return { ...state, timeScale: action.ts }
     case 'setParams': return { ...state, params: { ...state.params, ...action.params } }
-    case 'setViewMode': return { ...state, viewMode: action.mode }
     case 'stepForward': return { ...state, stepSignal: state.stepSignal + 1 }
     case 'stepBack': return { ...state, stepSignal: state.stepSignal - 1 }
     case 'reset': return { ...state, resetSignal: state.resetSignal + 1 }
@@ -75,7 +71,6 @@ function App() {
     playing: true,
     timeScale: 1,
     params: { ...modules[0].defaults },
-    viewMode: 'both' as const,
     stepSignal: 0,
     resetSignal: 0,
   })
@@ -127,9 +122,9 @@ function App() {
   stateRef.current = state
 
   const drawFn = useCallback(
-    (inp: { top: { ctx: CanvasRenderingContext2D; w: number; h: number }; side: { ctx: CanvasRenderingContext2D; w: number; h: number }; time: number; unit: Unit; playing: boolean; reducedMotion: boolean }, params: Params) => {
+    (inp: DrawInput, params: Params) => {
       const mod = modules[stateRef.current.moduleIdx]
-      if (mod.draw) mod.draw(inp as any, params)
+      if (mod.draw) mod.draw(inp, params)
     },
     [],
   )
@@ -150,7 +145,7 @@ function App() {
 
   /* ── render ──────────────────────────────────────────────────────── */
   return (
-    <div className={`app view-mode-${state.viewMode}`}>
+    <div className="app">
       {/* HEADER */}
       <header className="header">
         <h1 className="wordmark">ASGC Orbital Mechanics</h1>
@@ -175,22 +170,6 @@ function App() {
           {state.unit === 'kms' ? 'km/s' : 'km/min'}
         </button>
       </header>
-
-      {/* VIEW TOGGLE (narrow only) */}
-      <div className="view-toggle" role="group" aria-label="View mode">
-        {(['both', 'top', 'side'] as const).map((m) => (
-          <button
-            key={m}
-            className={`view-btn ${state.viewMode === m ? 'active' : ''}`}
-            aria-pressed={state.viewMode === m}
-            aria-label={`View mode: ${m === 'both' ? 'Top and Side' : m === 'top' ? 'Top-down only' : 'Side view only'}`}
-            onClick={() => dispatch({ type: 'setViewMode', mode: m })}
-            data-mode={m}
-          >
-            {m === 'both' ? 'Both' : m === 'top' ? 'Top' : 'Side'}
-          </button>
-        ))}
-      </div>
 
       {/* STAGE — DualView component handles rAF + canvas sizing */}
       <div id="stage" className="stage">
@@ -301,110 +280,6 @@ function App() {
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  )
-}
-
-/* ── DualView component (inlined to avoid import issues) ─ */
-interface DualViewProps {
-  draw: (inp: any, p: Params) => void
-  params: Params
-  playing: boolean
-  timeScale: number
-  unit: Unit
-  reducedMotion: boolean
-  stepSignal: number
-  resetSignal: number
-  phasePeriod: number
-  timeRef: React.MutableRefObject<number>
-}
-
-function DualView(props: DualViewProps): React.JSX.Element {
-  const topCanvas = useRef<HTMLCanvasElement | null>(null)
-  const sideCanvas = useRef<HTMLCanvasElement | null>(null)
-  const infosRef = useRef<Array<{ ctx: CanvasRenderingContext2D | null; w: number; h: number; dpr: number }>>([
-    { ctx: null, w: 0, h: 0, dpr: 1 },
-    { ctx: null, w: 0, h: 0, dpr: 1 },
-  ])
-  const propsRef = useRef(props)
-  propsRef.current = props
-
-  useEffect(() => {
-    const canvasEls = [topCanvas.current, sideCanvas.current]
-    const infos = infosRef.current
-    const sizeAll = () => {
-      canvasEls.forEach((el, i) => {
-        if (!el) return
-        const dpr = Math.min(2, window.devicePixelRatio || 1)
-        const rect = el.getBoundingClientRect()
-        const w = Math.max(80, Math.floor(rect.width))
-        const h = Math.max(80, Math.floor(rect.height))
-        el.width = Math.floor(w * dpr)
-        el.height = Math.floor(h * dpr)
-        infos[i] = { ctx: el.getContext('2d'), w, h, dpr }
-      })
-    }
-    sizeAll()
-    const ro = new ResizeObserver(sizeAll)
-    canvasEls.forEach((el) => el && ro.observe(el))
-    window.addEventListener('resize', sizeAll)
-    return () => { ro.disconnect(); window.removeEventListener('resize', sizeAll) }
-  }, [])
-
-  useEffect(() => {
-    let raf = 0
-    let last = performance.now()
-    const loop = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000)
-      last = now
-      const P = propsRef.current
-      if (P.playing && !P.reducedMotion) {
-        P.timeRef.current += dt * P.timeScale
-      }
-      const infos = infosRef.current
-      const mkInfo = (i: number): CanvasInfo | null => {
-        const info = infos[i]
-        if (!info.ctx || info.w < 20) return null
-        const ctx = info.ctx
-        ctx.setTransform(info.dpr, 0, 0, info.dpr, 0, 0)
-        return { ctx, w: info.w, h: info.h }
-      }
-      const top = mkInfo(0)
-      const side = mkInfo(1)
-      if (top && side) {
-        drawSpaceBackground(top)
-        drawSpaceBackground(side, 11)
-        propsRef.current.draw(
-          { top, side, time: P.timeRef.current, unit: P.unit, playing: P.playing, reducedMotion: P.reducedMotion },
-          P.params,
-        )
-      }
-      raf = requestAnimationFrame(loop)
-    }
-    raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
-  }, [])
-
-  // Step / reset signals
-  const stepSeen = useRef(props.stepSignal)
-  if (props.stepSignal !== stepSeen.current) {
-    stepSeen.current = props.stepSignal
-    props.timeRef.current += props.phasePeriod / 60
-  }
-  const resetSeen = useRef(props.resetSignal)
-  if (props.resetSignal !== resetSeen.current) {
-    resetSeen.current = props.resetSignal
-    props.timeRef.current = 0
-  }
-
-  return (
-    <div className="dualview">
-      <div className="dualview-pane">
-        <canvas ref={topCanvas} className="sim-canvas canvas-top" role="img" aria-label="Top-down orbital view" />
-      </div>
-      <div className="dualview-pane">
-        <canvas ref={sideCanvas} className="sim-canvas canvas-side" role="img" aria-label="Side orbital view" />
       </div>
     </div>
   )

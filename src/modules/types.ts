@@ -6,8 +6,8 @@ export type Unit = 'kms' | 'kmin'
 
 /** Per-frame inputs handed to a module's draw function. */
 export interface DrawInput {
+  /** The single top-down canvas. */
   top: CanvasInfo
-  side: CanvasInfo
   /** Continuous simulation clock in "display seconds" (module-chosen pace). */
   time: number
   unit: Unit

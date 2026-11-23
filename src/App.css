@@ -131,7 +131,7 @@ html, body, #root {
   outline-offset: 2px;
 }
 
-/* ── Stage (flex-1, dual canvas) ──────────────────────────────────── */
+/* ── Stage (flex-1, single top-down canvas) ───────────────────────── */
 .stage {
   flex: 1;
   display: flex;
@@ -148,11 +148,6 @@ html, body, #root {
   height: 100%;
   display: block;
   background: var(--bg-space);
-}
-
-/* ── View Toggle (narrow screens only) ─────────────────────────────── */
-.view-toggle {
-  display: none;
 }
 
 /* ── Dock (128px per DESIGN.md §2.1) ───────────────────────────────── */
@@ -440,65 +435,6 @@ input[type="range"]:focus-visible {
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
-  }
-
-  .view-toggle {
-    display: flex;
-    gap: 4px;
-    padding: 6px 12px;
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .view-btn {
-    flex: 1;
-    height: 34px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-panel);
-    color: var(--text-dim);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .view-btn.active,
-  .view-btn:hover {
-    background: rgba(77, 208, 225, 0.2);
-    border-color: var(--cyan);
-    color: var(--text-hi);
-  }
-
-  .view-btn:focus-visible {
-    outline: 3px solid var(--cyan);
-    outline-offset: 2px;
-  }
-
-  .stage .canvas-side {
-    display: none;
-  }
-
-  .view-btn[data-mode="top"].active ~ .stage .canvas-side,
-  .view-btn[data-mode="side"].active ~ .stage .canvas-top {
-    display: none;
-  }
-
-  .view-mode-top .stage .canvas-side {
-    display: none;
-  }
-
-  .view-mode-side .stage .canvas-top {
-    display: none;
-  }
-
-  .view-mode-both .stage .canvas-top,
-  .view-mode-both .stage .canvas-side {
-    display: block;
-  }
-
-  .view-mode-top .stage .canvas-top,
-  .view-mode-side .stage .canvas-side {
-    flex: 1;
   }
 
   .dock {

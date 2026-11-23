@@ -67,13 +67,5 @@ export const module: ModuleDef = {
     const vLabel = inp.unit === 'kms' ? `${circularVelocity(rKm).toFixed(3)} km/s` : `${(circularVelocity(rKm) * 60).toFixed(1)} km/min`
     drawLabel(inp.top, `v=${vLabel}`, sx + 14, sy - 14, { color: '#ffd60a', size: 16, bold: true })
     drawViewTag(inp.top, 'TOP-DOWN')
-
-    // SIDE VIEW
-    const sideV = makeView(inp.side, rKm)
-    drawEarth(inp.side, sideV.cx, sideV.cy, Math.max(5, 6371 * sideV.scale), 0.5)
-    drawOrbitPath(inp.side, sideV.cx, sideV.cy, sideV.scale, rKm, 0, { color: '#4dd0e1' })
-    drawCraft(inp.side, sideV.cx + rKm * sideV.scale * Math.cos(nu), sideV.cy + rKm * sideV.scale * Math.sin(nu) * 0.5, nu + Math.PI / 2)
-    drawLabel(inp.side, '☀ SUN →', sideV.cx + sideV.scale * rKm + 20, sideV.cy, { color: '#ffd60a', size: 14 })
-    drawViewTag(inp.side, 'SIDE VIEW')
   },
 }
