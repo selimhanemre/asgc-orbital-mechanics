@@ -90,8 +90,7 @@ Dark space theme. All text/pair combinations below were computed; weakest pair i
 | `--yellow` | `#FFD60A` | spacecraft, key values (Total Δv, v labels) | 13.4:1 on space (AAA) |
 | `--amber` | `#FFB300` | transfer orbit, burn arrows, warning chips | 10.6:1 on space (AAA) |
 | `--blue-accent` | `#5B9BF8` | Earth atmosphere rim | 6.8:1 on space |
-| `--ocean` | `#2D7DD2` | Earth base | — |
-| `--land` | `#7BC67E` | stylized continents | — |
+| `--ocean` | `#2D7DD2` | Earth base (canvas disk gradient, §6.2) | — |
 | `--night` | `#05070F` | terminator shade @ 55% opacity | — |
 
 **Rules:** never encode meaning with red/green (none exists in this palette). Every semantic difference is also carried by geometry (solid vs dashed, arrow direction) and text (labels on all markers).
@@ -239,15 +238,18 @@ The canvas (single top-down view) uses one coordinate pipeline: scene centered o
 
 ### 6.2 Earth conventions (top-down, north polar)
 
+Plain gradient disk — **no continents, no polar caps** (removed in ASGC-2.5:
+the green/white blobs distracted from the lessons; simpler wins). Earth is
+pinned at the canvas center at a fixed pixel radius (`EARTH_PX`, ASGC-2.2)
+and never rescales with the sliders.
+
 | Element | Style |
 |---|---|
-| Base disk | `#2D7DD2` |
-| Continents | 4–6 stylized `#7BC67E` blobs (fixed canvas paths) |
-| Graticule | circles at 30°/60° lat (r·cos30, r·cos60) + 6 meridian diameters, white 1 px @22% |
-| Orientation mark | “N” 14 px bold at top |
-| Terminator | **none** (polar view, sun direction irrelevant) |
-| Atmosphere | rim 2 px `#5B9BF8` @40% at R+2, 6 px halo @12% at R+5 |
-| Simplification | if screen R⊕ < 28 px: solid ocean disk + rim only (no continents/graticule) |
+| Disk | radial gradient `#3F8FD4` → `#1F5FA8` (55%) → `#0D2F63` (rim) |
+| Rim | 1 px `#5B9BF8` @45%, drawn just inside the disk edge |
+| Terminator | subtle linear shading, light from the left, up to 55% `#000019` at the right rim |
+| Atmosphere | radial glow `#5AA0FF` @30% fading to 0 from 0.8 R out to 1.35 R |
+| Continents / polar caps / graticule | **none** |
 
 ### 6.3 Spacecraft & vectors
 

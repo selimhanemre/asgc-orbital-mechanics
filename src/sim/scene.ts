@@ -105,7 +105,10 @@ export function drawSpaceBackground(c: CanvasInfo, seed = 7): void {
 }
 
 /**
- * Stylized canvas-drawn Earth (no external assets).
+ * Canvas-drawn Earth (no external assets): a simple gradient disk with a
+ * subtle rim, atmospheric glow, and soft terminator shading.
+ * No continents, no polar caps (removed in ASGC-2.5 — they distracted from
+ * the lessons; if in doubt, simpler wins).
  * rPx = pixel radius (north-polar top-down view).
  */
 export function drawEarth(c: CanvasInfo, cx: number, cy: number, rPx: number): void {
@@ -121,7 +124,7 @@ export function drawEarth(c: CanvasInfo, cx: number, cy: number, rPx: number): v
   ctx.beginPath()
   ctx.arc(0, 0, rPx * 1.35, 0, Math.PI * 2)
   ctx.fill()
-  // ocean body
+  // ocean body (simple radial gradient)
   const body = ctx.createRadialGradient(-rPx * 0.35, -rPx * 0.4, rPx * 0.2, 0, 0, rPx)
   body.addColorStop(0, '#3f8fd4')
   body.addColorStop(0.55, '#1f5fa8')
@@ -130,33 +133,6 @@ export function drawEarth(c: CanvasInfo, cx: number, cy: number, rPx: number): v
   ctx.beginPath()
   ctx.arc(0, 0, rPx, 0, Math.PI * 2)
   ctx.fill()
-  // stylized continents
-  ctx.save()
-  ctx.beginPath()
-  ctx.arc(0, 0, rPx, 0, Math.PI * 2)
-  ctx.clip()
-  ctx.fillStyle = 'rgba(88,178,116,0.85)'
-  const blobs: Array<[number, number, number, number]> = [
-    [-0.45, -0.25, 0.42, 0.30],
-    [0.25, -0.45, 0.34, 0.24],
-    [0.45, 0.25, 0.30, 0.34],
-    [-0.2, 0.45, 0.36, 0.22],
-    [-0.7, 0.15, 0.2, 0.28],
-  ]
-  for (const [bx, by, brx, bry] of blobs) {
-    ctx.beginPath()
-    ctx.ellipse(bx * rPx, by * rPx, brx * rPx, bry * rPx, 0.4, 0, Math.PI * 2)
-    ctx.fill()
-  }
-  // polar caps
-  ctx.fillStyle = 'rgba(235,245,255,0.8)'
-  ctx.beginPath()
-  ctx.ellipse(0, -rPx * 0.86, rPx * 0.5, rPx * 0.22, 0, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.beginPath()
-  ctx.ellipse(0, rPx * 0.88, rPx * 0.45, rPx * 0.2, 0, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.restore()
   // terminator shading (light from the left)
   const shade = ctx.createLinearGradient(-rPx, 0, rPx, 0)
   shade.addColorStop(0, 'rgba(0,0,0,0)')
@@ -166,6 +142,12 @@ export function drawEarth(c: CanvasInfo, cx: number, cy: number, rPx: number): v
   ctx.beginPath()
   ctx.arc(0, 0, rPx, 0, Math.PI * 2)
   ctx.fill()
+  // subtle rim
+  ctx.strokeStyle = 'rgba(91,155,248,0.45)'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.arc(0, 0, rPx - 0.5, 0, Math.PI * 2)
+  ctx.stroke()
   ctx.restore()
 }
 
