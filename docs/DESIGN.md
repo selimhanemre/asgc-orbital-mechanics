@@ -9,9 +9,11 @@ Reference mockups (rendered at exact target viewports):
 
 | File | Viewport | Shows |
 |---|---|---|
-| [`mockups/mockup-desktop-kepler.png`](mockups/mockup-desktop-kepler.png) | 1366×768 | Full app shell, Module 1 (Kepler) active, top-down canvas, bottom dock |
-| [`mockups/mockup-desktop-hohmann.png`](mockups/mockup-desktop-hohmann.png) | 1366×768 | Module 5 (Hohmann): transfer ellipse, burn arrows, Δv readouts |
-| [`mockups/mockup-narrow-circular.png`](mockups/mockup-narrow-circular.png) | 480×768 | Narrow layout: single top-down canvas, Module 2 (Circular) |
+| [`mockups/mockup-desktop-kepler.png`](mockups/mockup-desktop-kepler.png) | 1366×768 | Module 1 (Kepler) active, top-down canvas, bottom dock — **pre-2.3 shell (header tabs)** |
+| [`mockups/mockup-desktop-hohmann.png`](mockups/mockup-desktop-hohmann.png) | 1366×768 | Module 5 (Hohmann): transfer ellipse, burn arrows, Δv readouts — **pre-2.3 shell** |
+| [`mockups/mockup-narrow-circular.png`](mockups/mockup-narrow-circular.png) | 480×768 | Narrow layout: single top-down canvas, Module 2 (Circular) — **pre-2.3 shell** |
+
+(The mockups predate the ASGC-2.3 layout rework; §2 below describes the current shell.)
 
 ---
 
@@ -27,39 +29,41 @@ Reference mockups (rendered at exact target viewports):
 
 ## 2. App shell & layout
 
-### 2.1 Shell zones (desktop)
+### 2.1 Shell zones (ASGC-2.3: left sidebar + split main)
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│ HEADER 60px │ wordmark · module tabs (6) · unit toggle (km/s|km/min)│
-├────────────────────────────────────────────────────────────────────┤
-│                                                                    │
-│  STAGE  flex-1 (580px @768)   padding 12                           │
-│  ┌──────────────────────────────────────────────────────────┐      │
-│  │ CANVAS TOP-DOWN  (1342px) — badge · scale bar            │      │
-│  └──────────────────────────────────────────────────────────┘      │
-│                                                                    │
-├────────────────────────────────────────────────────────────────────┤
-│ DOCK 128px │ transport (238) · module sliders (flex) · readouts    │
-│            │                                            (330, 6chips)│
-└────────────────────────────────────────────────────────────────────┘
+┌──────────────┬───────────────────────────────────────────────────────┐
+│ SIDEBAR      │ MAIN (flex column)                                    │
+│ 220px (64px  │ ┌───────────────────────────────────────────────────┐ │
+│  narrow)     │ │ STAGE flex-1 — top-down canvas (padding 12)       │ │
+│              │ │  Earth pinned center, fixed scale (§6)            │ │
+│ wordmark     │ └───────────────────────────────────────────────────┘ │
+│ lesson list  │ ┌───────────────────────────────────────────────────┐ │
+│ 1 Kepler     │ │ CONTROLS (bottom bar, internal scroll)            │ │
+│ 2 Circular   │ │ row 1: sliders (flex) · readouts (330, 3×2 chips) │ │
+│ 3 Elliptical │ │ row 2: transport · speed ……… [ Next > ] bottom-right│ │
+│ 4 Alt–Period │ └───────────────────────────────────────────────────┘ │
+│ 5 Hohmann    │                                                       │
+│ 6 Launch     │                                                       │
+│ ─ settings ─ │                                                       │
+│ km/s | km/min│                                                       │
+└──────────────┴───────────────────────────────────────────────────────┘
 ```
 
-Vertical budget @ **1366×768**: 60 + 580 + 128 = 768 exactly. Canvas card: 1366 − 2×12 padding = **1342 × 556** inside 12 px padding + 10 px radius card.
+- **Sidebar (fixed 220 px, 64 px narrow):** wordmark on top ("ASGC" + "Orbital Mechanics" sub-line); the six lessons as a **vertical numbered list** below — one number per lesson (the number is rendered once by the shell; module `short` labels have their leading number stripped so nothing duplicates, e.g. never "1 1 Kepler"); settings block pinned to the **bottom** — the unit toggle (`km/s | km/min`, key `U`). On narrow the sidebar collapses to a 64 px rail: wordmark "ASGC", number-only lesson buttons (full name in `aria-label`/`title`), compact unit toggle.
+- **Main (flex column, right of sidebar):** top = stage (flex-1, min 140 px) with the single top-down canvas — most of the space. Bottom = control bar: row 1 = module sliders (flex) + readout grid (330 px, 3×2 chips); row 2 (foot) = transport (play/pause, step ±, reset) + speed segments, with a **"Next >" button pinned to the very bottom-right** (advances to the next lesson; wraps from 6 back to 1).
+- **No clipping, ever:** the outer `.app` keeps `height: 100vh; overflow: hidden`, but the control bar has `max-height: 62%` and its row 1 scrolls internally (`overflow: auto`), and the foot row wraps. The canvas stage keeps a 140 px floor. At every supported viewport all buttons and sliders stay visible and operable — they scroll/wrap, never get cut off.
 
-- **Header (60 px):** wordmark left, tab bar center (flex, `margin: 0 auto`), unit toggle right.
-- **Stage (flex-1):** one full-width canvas card (top-down view only; the side view was removed — see §2.3). The card is a borderless canvas fill; badge and scale bar are canvas-drawn (not DOM), so they scale with the canvas.
-- **Dock (128 px):** three zones left→right — transport (fixed 238 px), module sliders (flex), readout grid (fixed 330 px, 3×2 chips).
+Vertical budget @ **1366×768** (measured): main = stage **527 px** + controls **241 px** (row 1 ≈ 177, foot 44, paddings/gaps). Canvas card: 1366 − 220 − 2×12 padding = **1122 × 532** inside 12 px padding.
 
 ### 2.2 Breakpoints (exact)
 
-| Range | Name | Canvas arrangement | Dock | Tabs |
+| Range | Name | Sidebar | Canvas | Control bar |
 |---|---|---|---|---|
-| **≥ 1200 px** | desktop | single top-down canvas, full width | one row, 3 zones (128 px) | number + full label, 14 px |
-| **800–1199 px** | tablet | single top-down canvas, full width | two rows (min 156 px): row 1 = transport + readouts, row 2 = full-width sliders | number + short label |
-| **360–799 px** | narrow | single top-down canvas fills the stage | 170 px: row 1 transport, row 2 slider(s), row 3 readouts (3 chips) | horizontal, number + 3–6 char label, 11 px, scrollable if < 6 fit |
+| **≥ 800 px** | desktop / tablet | 220 px: wordmark, numbered lessons with labels, settings (unit toggle) | single top-down canvas, full width, flex-1 | row 1 = sliders + readouts (330 px); row 2 = transport + speed + `Next >` (bottom-right); wraps if needed |
+| **360–799 px** | narrow | 64 px rail: "ASGC", number-only lessons, unit toggle | single top-down canvas fills the stage | rows stack (sliders, then readouts 2×3) and scroll internally; foot row wraps to as many lines as needed; `Next >` stays bottom-right |
 
-Media queries to use: `@media (min-width: 1200px)`, `@media (min-width: 800px) and (max-width: 1199.98px)`, `@media (max-width: 799.98px)`. Minimum supported width **360 px**. No horizontal scroll at any supported size.
+Media queries: `@media (max-width: 799.98px)` for the narrow rail/stacking; `@media (min-width: 800px) and (max-width: 1199.98px)` drops the sliders floor to 200 px so row 1 (sliders 200 + gap 16 + readouts 330 = 546 px) never scrolls horizontally at 800 px wide. Minimum supported width **360 px**. No horizontal scroll at any supported size; vertical overflow is handled by internal scrolling inside the control bar.
 
 ### 2.3 Views (single top-down)
 
@@ -138,11 +142,12 @@ Hard floor: **no canvas label below 14 px**, no key value below 16 px. Canvas te
 
 ## 4. Module navigation
 
-- Six tabs in the header, left→right in learning order: **1 Kepler’s Laws · 2 Circular · 3 Elliptical · 4 Alt · Period · 5 Hohmann · 6 Launch**.
-- Tab anatomy: `number (mono, dim) + label`. Active tab: cyan 14% background, cyan 55% border, 2 px cyan top inset bar, white text.
+- Six lesson buttons in the **left sidebar, top→bottom in learning order**: **1 Kepler’s Laws · 2 Circular · 3 Elliptical · 4 Alt · Period · 5 Hohmann · 6 Launch**.
+- Lesson anatomy: `number (mono, dim) + label`, one number per lesson (the shell renders the number; the module `short` label’s leading number is stripped — no "1 1 Kepler" duplication). Active lesson: cyan 14% background, 3 px cyan left inset bar, white text.
 - Selection is instant (no transition > 120 ms); the canvas re-renders immediately with the module’s defaults.
+- **"Next >"** (control-bar foot row, bottom-right) advances to the next lesson and wraps from 6 back to 1.
 - Switching modules preserves global settings (unit, speed, play state) but resets that module’s parameters to its defaults.
-- **Keyboard:** keys **1–6** jump directly; `←`/`→` move focus across tabs (roving tabindex); `Enter`/`Space` activates. Tab order: header (wordmark → tabs → unit toggle) → dock (transport → sliders → readouts).
+- **Keyboard:** keys **1–6** jump directly; `Enter`/`Space` activates the focused lesson. Focus order: sidebar (wordmark → lessons → unit toggle) → stage → controls (sliders → readouts → transport → Next).
 
 ### Per-module panel specification
 
@@ -187,19 +192,19 @@ Each module defines: sliders (in dock center), readout chips (dock right, 6 slot
 
 ## 5. Control system (global, identical in every module)
 
-### 5.1 Transport group (dock left, 238 px)
+### 5.1 Transport group (control-bar foot row)
 
-Row 1 — four 44 px buttons:
+Row — 44 px buttons (icon-only on narrow, `Next >` stays labeled):
 1. **Play/Pause** (primary cyan, `❚❚`/`▶`) — `Space`, `aria-pressed`.
 2. **Step back** `◀` — `←` (pauses if running).
 3. **Step forward** `▶` — `→` (pauses if running). Steps = 2% of the current period.
 4. **Reset** `↺` — `R` (module params → defaults, `t = 0`, paused state preserved).
 
-Row 2 — speed segments (mono 13 px): `0.5× | 1× | 2× | 5× | 10×`, default `1×`. Keys `[` / `]` step down/up.
+Speed segments (mono 13 px): `0.5× | 1× | 2× | 5× | 10×`, default `1×`. Keys `[` / `]` step down/up.
 
 **Time scale:** `1×` = **60 simulated seconds per real second** (LEO ≈ 1.5 s/orbit, GEO ≈ 103 s/orbit; 5–10× for GEO work).
 
-### 5.2 Unit toggle (header right)
+### 5.2 Unit toggle (sidebar settings, bottom)
 
 Segmented `km/s | km/min`, default `km/s`, key `U`. Affects every velocity readout (canvas + DOM) simultaneously; values are converted, never re-simulated. Chip/canvas velocity labels update live; period is always shown in min (h mm for ≥ 60 min, e.g. “5 h 17 m” for transfer time).
 
@@ -212,7 +217,7 @@ Anatomy: label (14 px, `--text-mid`, uppercase) left + value (18 px mono bold, w
 - Keyboard: arrow = 1 step, `Shift`+arrow = 10 steps; value readout is the slider’s `aria-valuetext` (e.g. “400 kilometers”).
 - Physical clamps are hard: the thumb cannot leave the range; module-level clamps (perigee ≥ 200 km; Hohmann target ordering) clamp silently and flash the value in amber for 600 ms.
 
-### 5.4 Readout grid (dock right, 330 px, 3×2)
+### 5.4 Readout grid (control-bar row 1, right, 330 px, 3×2)
 
 Chips: 8 px radius, `--bg-panel` on a slightly darker `#0E1526` fill, key (11 px uppercase dim) over value (16 px mono bold white). Live values (position-dependent) update at **≤ 10 Hz** (throttled) to avoid flicker; all use `tabular-nums`. One chip per module may carry the `.hot` (yellow value) treatment for the module’s “money” number (T²/a³, Total Δv). Empty slots render an empty chip (stable layout).
 
@@ -277,7 +282,7 @@ The canvas (single top-down view) uses one coordinate pipeline: scene centered o
 | Key | Action |
 |---|---|
 | `Space` | play / pause |
-| `←` / `→` | step ∓2% of period (pauses); moves focus only when a tab has focus (roving tabindex) |
+| `←` / `→` | step ∓2% of period (pauses) |
 | `1`–`6` | switch module |
 | `[` / `]` | speed down / up |
 | `U` | toggle km/s ↔ km/min |
@@ -315,16 +320,20 @@ The canvas (single top-down view) uses one coordinate pipeline: scene centered o
 
 ```
 App
-├─ Header
-│  ├─ Wordmark
-│  ├─ ModuleTabs (roving tabindex, 1–6 keys)
-│  └─ UnitToggle (km/s | km/min, key U)
-├─ Stage
-│  └─ CanvasCard "top"      (canvas + 1 Hz aria-label)
-└─ ControlDock
-   ├─ TransportGroup (play/pause, step±, reset, speed segments)
-   ├─ ModuleSliders (per §4)
-   └─ ReadoutGrid (6 chips, 10 Hz)
+├─ Sidebar
+│  ├─ Wordmark (ASGC / Orbital Mechanics)
+│  ├─ LessonList (vertical 1–6, keys 1–6)
+│  └─ Settings (UnitToggle km/s | km/min, key U)
+└─ Main
+   ├─ Stage
+   │  └─ CanvasCard "top"      (canvas + 1 Hz aria-label)
+   └─ Controls
+      ├─ ControlsMain (internal scroll)
+      │  ├─ ModuleSliders (per §4)
+      │  └─ ReadoutGrid (6 chips, 10 Hz)
+      └─ ControlsFoot
+         ├─ TransportGroup (play/pause, step±, reset, speed segments)
+         └─ NextButton ("Next >", bottom-right, wraps 6→1)
 ```
 
 ---

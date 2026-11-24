@@ -17,6 +17,9 @@
 
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  --sidebar-w: 220px;
+  --sidebar-w-narrow: 64px;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────────── */
@@ -32,84 +35,127 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── App Layout ────────────────────────────────────────────────────── */
+/* ── App Layout: [sidebar | main] ─────────────────────────────────── */
 .app {
   display: flex;
-  flex-direction: column;
   height: 100vh;
   min-height: 360px;
-  overflow: hidden;
+  overflow: hidden; /* outer shell only — inner regions scroll, see .controls-main */
 }
 
-/* ── Header (60px per DESIGN.md §2.1) ─────────────────────────────── */
-.header {
+/* ── Sidebar (wordmark · lessons · settings) ───────────────────────── */
+.sidebar {
   display: flex;
-  align-items: center;
-  height: 60px;
-  padding: 0 16px;
+  flex-direction: column;
   gap: 16px;
-  background: var(--bg-header);
-  border-bottom: 1px solid var(--border);
+  width: var(--sidebar-w);
   flex-shrink: 0;
-  z-index: 10;
+  min-height: 0;
+  padding: 16px 12px 12px;
+  background: var(--bg-header);
+  border-right: 1px solid var(--border);
 }
 
 .wordmark {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   letter-spacing: 0.02em;
+  line-height: 1.15;
   color: var(--text-hi);
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* ── Module Tabs ───────────────────────────────────────────────────── */
-.tabs {
+.wordmark-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+/* ── Lesson list (vertical, one number per lesson) ─────────────────── */
+.lessons {
   display: flex;
+  flex-direction: column;
   gap: 4px;
-  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
-.tab {
+.lesson {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 2px solid transparent;
-  border-top: 2px solid transparent;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
   border-radius: 8px;
   background: transparent;
   color: var(--text-dim);
   font-size: 14px;
   font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
   cursor: pointer;
   transition: none;
-  white-space: nowrap;
 }
 
-.tab-num {
+.lesson-num {
   font-family: var(--mono);
   font-size: 12px;
-  opacity: 0.7;
+  width: 16px;
+  text-align: center;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
-.tab.active,
-.tab:hover {
+.lesson-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lesson.active,
+.lesson:hover {
   background: rgba(77, 208, 225, 0.14);
-  border-color: rgba(77, 208, 225, 0.55);
+  border-left-color: var(--cyan);
   color: var(--text-hi);
 }
 
-.tab:focus-visible {
+.lesson:focus-visible {
   outline: 3px solid var(--cyan);
   outline-offset: 2px;
 }
 
-/* ── Unit Toggle ───────────────────────────────────────────────────── */
+/* ── Settings (pinned to sidebar bottom) ───────────────────────────── */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
 .unit-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
+  width: 100%;
+  padding: 10px 14px;
+  min-height: 44px;
   border: 2px solid var(--border);
   border-radius: 8px;
   background: var(--bg-panel);
@@ -118,7 +164,6 @@ html, body, #root {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  min-width: 60px;
 }
 
 .unit-toggle:hover {
@@ -131,86 +176,57 @@ html, body, #root {
   outline-offset: 2px;
 }
 
-/* ── Stage (flex-1, single top-down canvas) ───────────────────────── */
-.stage {
-  flex: 1;
+/* ── Main column: stage over control bar ───────────────────────────── */
+.main {
   display: flex;
-  gap: 12px;
-  padding: 12px;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
   min-height: 0;
+}
+
+/* ── Stage (flex-1, single top-down canvas — the bulk of the space) ── */
+.stage {
+  flex: 1 1 auto;
+  min-height: 140px; /* canvas stays visible even when controls are tall */
+  min-width: 0;
+  display: flex;
+  padding: 12px;
   overflow: hidden;
 }
 
-.canvas {
-  flex: 1;
-  border-radius: 10px;
-  width: 100%;
-  height: 100%;
-  display: block;
-  background: var(--bg-space);
-}
-
-/* ── Dock (128px per DESIGN.md §2.1) ───────────────────────────────── */
-.dock {
+/* ── Control bar (bottom of main) ────────────────────────────────────
+   Two rows: main row (sliders + readouts) scrolls internally; the foot
+   row (transport + speed + Next >) is pinned and never clipped.       */
+.controls {
   display: flex;
-  flex-shrink: 0;
-  height: 128px;
-  padding: 8px 12px;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 62%; /* if content is taller, .controls-main scrolls */
+  padding: 12px 16px;
   background: var(--bg-header);
   border-top: 1px solid var(--border);
 }
 
-/* ── Transport (238px) ─────────────────────────────────────────────── */
-.transport {
+.controls-main {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 238px;
-  flex-shrink: 0;
-}
-
-.transport .btn {
-  min-height: 44px;
-}
-
-.speed {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.speed-btn {
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-panel);
-  color: var(--text-dim);
-  font-family: var(--mono);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.speed-btn.active,
-.speed-btn:hover {
-  background: rgba(77, 208, 225, 0.2);
-  border-color: var(--cyan);
-  color: var(--text-hi);
-}
-
-.speed-btn:focus-visible {
-  outline: 3px solid var(--cyan);
-  outline-offset: 2px;
-}
-
-/* ── Sliders (flex) ────────────────────────────────────────────────── */
-.sliders {
+  gap: 16px;
   flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+/* ── Sliders ───────────────────────────────────────────────────────── */
+.sliders {
+  flex: 1 1 300px;
+  min-width: 240px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
-  min-width: 0;
+  gap: 12px;
 }
 
 .param {
@@ -322,7 +338,8 @@ input[type="range"]:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+  gap: 6px;
+  min-height: 44px;
   padding: 0 16px;
   border: 2px solid var(--border);
   border-radius: 8px;
@@ -355,20 +372,46 @@ input[type="range"]:focus-visible {
   background: rgba(77, 208, 225, 0.25);
 }
 
-.btn-small {
-  height: 32px;
-  padding: 0 10px;
-  font-size: 12px;
+/* ── Speed segments ────────────────────────────────────────────────── */
+.speed {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
-/* ── Readout Grid (330px, 3×2 chips) ──────────────────────────────── */
+.speed-btn {
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.speed-btn.active,
+.speed-btn:hover {
+  background: rgba(77, 208, 225, 0.2);
+  border-color: var(--cyan);
+  color: var(--text-hi);
+}
+
+.speed-btn:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* ── Readout grid (3×2 chips) ──────────────────────────────────────── */
 .readouts {
+  flex: 0 0 330px;
+  width: 330px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(2, minmax(48px, 1fr));
   gap: 6px;
-  width: 330px;
-  flex-shrink: 0;
+  align-self: center;
 }
 
 .chip {
@@ -403,6 +446,36 @@ input[type="range"]:focus-visible {
   color: var(--yellow);
 }
 
+/* ── Foot row: transport … Next > (very bottom right) ──────────────── */
+.controls-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.foot-spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-next {
+  border-color: var(--cyan);
+  background: rgba(77, 208, 225, 0.2);
+  color: var(--text-hi);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-left: auto; /* pinned to the very bottom-right corner */
+}
+
+.btn-next:hover {
+  background: rgba(77, 208, 225, 0.32);
+  border-color: var(--cyan);
+  color: var(--text-hi);
+}
+
 /* ── Reduced Motion Note ───────────────────────────────────────────── */
 .rm-note {
   color: var(--amber);
@@ -411,56 +484,83 @@ input[type="range"]:focus-visible {
   opacity: 0.85;
 }
 
-/* ── Responsive: Tablet (800–1199px) ──────────────────────────────── */
+/* ── Responsive: Tablet (800–1199px) ─────────────────────────────────
+   Main row stays horizontal; shrink the sliders floor so
+   sliders(200) + gap(16) + readouts(330) = 546 ≤ 548 px at 800 wide.  */
 @media (min-width: 800px) and (max-width: 1199.98px) {
-  .dock {
-    flex-direction: column;
-    height: auto;
-    min-height: 156px;
-  }
-  .transport {
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
   .sliders {
-    flex-direction: row;
-    flex-wrap: wrap;
+    min-width: 200px;
   }
 }
 
-/* ── Responsive: Narrow (360–799px) ───────────────────────────────── */
+/* ── Responsive: Narrow (360–799px) ──────────────────────────────────
+   Sidebar collapses to a 64px rail (numbers only); the control bar
+   stacks and scrolls internally — nothing is clipped.                 */
 @media (max-width: 799.98px) {
-  .stage {
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-
-  .dock {
-    flex-direction: column;
-    flex-shrink: 1;
-    height: auto;
-    max-height: calc(100vh - 94px);
-    overflow-y: auto;
-  }
-
-  .readouts {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: auto;
+  .sidebar {
+    width: var(--sidebar-w-narrow);
+    padding: 12px 8px;
+    gap: 12px;
   }
 
   .wordmark {
-    font-size: 16px;
+    font-size: 15px;
+    text-align: center;
   }
 
-  .tab {
+  .wordmark-sub,
+  .lesson-label,
+  .settings-title {
+    display: none;
+  }
+
+  .lesson {
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  .unit-toggle {
+    min-width: 0;
+    width: 100%;
+    padding: 10px 4px;
     font-size: 12px;
-    padding: 4px 8px;
   }
 
-  .tab-num {
-    font-size: 11px;
+  .controls {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .controls-main {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sliders {
+    flex: none;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .readouts {
+    flex: none;
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, minmax(48px, auto));
+    align-self: stretch;
+  }
+
+  /* compact transport: icon-only buttons so the foot row stays small */
+  .btn {
+    padding: 0 12px;
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .btn-next {
+    padding: 0 14px;
   }
 }
 
