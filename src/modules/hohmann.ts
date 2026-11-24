@@ -7,7 +7,7 @@ import { circularRadius, periodFromSemiMajor } from '../sim/engine'
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawInfoBox, EARTH_PX,
+  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawInfoBox, EARTH_PX, STEP,
 } from '../sim/scene'
 
 const defaults: Params = { startAlt: 400, targetAlt: 35786 }
@@ -79,8 +79,8 @@ export const module: ModuleDef = {
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, r2, 0, { color: '#4dd0e1' })
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, aT, eT, { color: '#ffb300', dashed: true, width: 3 })
 
-    drawLabel(inp.top, `Δv₁ →`, topV.cx + r1 * topV.scale + 8, topV.cy - 20, { color: '#ffb300', size: 16, bold: true })
-    drawLabel(inp.top, `← Δv₂`, topV.cx - r2 * topV.scale - 55, topV.cy - 20, { color: '#ffb300', size: 16, bold: true })
+    drawLabel(inp.top, `Δv₁ →`, topV.cx + r1 * topV.scale + 8, topV.cy - 20, { color: '#ffb300', size: STEP.step1, bold: true })
+    drawLabel(inp.top, `← Δv₂`, topV.cx - r2 * topV.scale - 55, topV.cy - 20, { color: '#ffb300', size: STEP.step1, bold: true })
 
     let sx: number, sy: number
     if (phase === 'initial') {

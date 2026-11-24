@@ -15,8 +15,8 @@
   --land: #7BC67E;
   --night: #05070F;
 
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, "SF Mono", Consolas, "DejaVu Sans Mono", monospace;
+  /* Typography tokens (--font-display / --font-body / --font-mono and the
+     --step-* typescale) live in src/index.css — single source of truth. */
 
   --sidebar-w: 220px;
   --sidebar-w-narrow: 64px;
@@ -29,7 +29,7 @@ html, body, #root {
   height: 100%;
   background: var(--bg-space);
   color: var(--text-hi);
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
@@ -57,7 +57,8 @@ html, body, #root {
 }
 
 .wordmark {
-  font-size: 20px;
+  font-family: var(--font-display);
+  font-size: var(--step-2);
   font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1.15;
@@ -68,7 +69,8 @@ html, body, #root {
 .wordmark-sub {
   display: block;
   margin-top: 3px;
-  font-size: 12px;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--text-dim);
@@ -97,7 +99,8 @@ html, body, #root {
   border-radius: 8px;
   background: transparent;
   color: var(--text-dim);
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: var(--step-0);
   font-weight: 600;
   text-align: left;
   white-space: nowrap;
@@ -106,8 +109,8 @@ html, body, #root {
 }
 
 .lesson-num {
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
   width: 16px;
   text-align: center;
   opacity: 0.8;
@@ -142,7 +145,8 @@ html, body, #root {
 }
 
 .settings-title {
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -160,8 +164,8 @@ html, body, #root {
   border-radius: 8px;
   background: var(--bg-panel);
   color: var(--text-mid);
-  font-family: var(--mono);
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
   font-weight: 600;
   cursor: pointer;
 }
@@ -242,7 +246,8 @@ html, body, #root {
 }
 
 .param-head label {
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
   font-weight: 600;
   color: var(--text-mid);
   text-transform: uppercase;
@@ -250,8 +255,8 @@ html, body, #root {
 }
 
 .param-value {
-  font-family: var(--mono);
-  font-size: 18px;
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
   font-weight: 700;
   color: var(--text-hi);
   font-variant-numeric: tabular-nums;
@@ -308,7 +313,7 @@ input[type="range"]:focus-visible {
   border-radius: 8px;
   background: var(--bg-panel);
   color: var(--text-mid);
-  font-size: 14px;
+  font-size: var(--step-0);
   font-weight: 600;
   cursor: pointer;
 }
@@ -327,7 +332,7 @@ input[type="range"]:focus-visible {
 
 .btn-burn {
   padding: 10px 24px;
-  font-size: 16px;
+  font-size: var(--step-1);
   font-weight: 700;
   letter-spacing: 0.05em;
   min-height: 44px;
@@ -345,7 +350,8 @@ input[type="range"]:focus-visible {
   border-radius: 8px;
   background: var(--bg-panel);
   color: var(--text-mid);
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -386,8 +392,8 @@ input[type="range"]:focus-visible {
   border-radius: 8px;
   background: var(--bg-panel);
   color: var(--text-dim);
-  font-family: var(--mono);
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
   cursor: pointer;
 }
 
@@ -427,7 +433,8 @@ input[type="range"]:focus-visible {
 }
 
 .chip-label {
-  font-size: 12px;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
   font-weight: 700;
   color: var(--text-mid);
   text-transform: uppercase;
@@ -435,7 +442,11 @@ input[type="range"]:focus-visible {
 }
 
 .chip-value {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
+  /* 16px — the one deliberate off-scale pin (docs/DESIGN.md §3.2): the
+     fixed 3×2 readout grid (330px basis; 300px under 1200px) physically
+     cannot fit 17px mono for 10-char values (92px + 16px padding >
+     96px track at tablet). All other value text uses --step-1. */
   font-size: 16px;
   font-weight: 700;
   color: var(--text-hi);
@@ -464,7 +475,7 @@ input[type="range"]:focus-visible {
   border-color: var(--cyan);
   background: rgba(77, 208, 225, 0.2);
   color: var(--text-hi);
-  font-size: 15px;
+  font-size: var(--step-0);
   font-weight: 700;
   letter-spacing: 0.02em;
   margin-left: auto; /* pinned to the very bottom-right corner */
@@ -479,7 +490,7 @@ input[type="range"]:focus-visible {
 /* ── Reduced Motion Note ───────────────────────────────────────────── */
 .rm-note {
   color: var(--amber);
-  font-size: 13px;
+  font-size: var(--step--1);
   padding: 4px 0;
   opacity: 0.85;
 }
@@ -504,7 +515,7 @@ input[type="range"]:focus-visible {
   }
 
   .wordmark {
-    font-size: 15px;
+    font-size: var(--step-0);
     text-align: center;
   }
 
@@ -523,7 +534,7 @@ input[type="range"]:focus-visible {
     min-width: 0;
     width: 100%;
     padding: 10px 4px;
-    font-size: 12px;
+    font-size: var(--step--1);
   }
 
   .controls {

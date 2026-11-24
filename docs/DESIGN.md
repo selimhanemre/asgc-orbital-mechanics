@@ -20,7 +20,7 @@ Reference mockups (rendered at exact target viewports):
 ## 1. Design principles
 
 1. **Play-first.** The orbit is the interface. Text is limited to labels, values, and one dismissible hint line per module. No paragraphs, no quizzes, no modals.
-2. **Projector-readable.** Default demo context is a school/symposium room: labels legible at ~10 ft. Dark space background, high-contrast strokes, minimum canvas label size 16 px, key values 18–20 px.
+2. **Projector-readable.** Default demo context is a school/symposium room: labels legible at ~10 ft. Dark space background, high-contrast strokes, canvas labels ≥ 14 px (step-0), key values ≥ 17 px (step-1).
 3. **One consistent control language.** Every module uses the same transport, slider, readout, and unit-toggle patterns. A student who touched one module can use every module.
 4. **Honest physics, honest scale.** Real constants (μ = 398 600 km³/s², R⊕ = 6371 km), real units, on-canvas scale bar. Earth-vs-orbit scale is always to scale; only the overall zoom is adaptive.
 5. **Accessible by construction.** Full keyboard operation, `prefers-reduced-motion` respected, WCAG AA contrast everywhere (all pairs in §3 verified ≥ 4.5:1), colorblind-safe encoding (§9).
@@ -96,40 +96,46 @@ Dark space theme. All text/pair combinations below were computed; weakest pair i
 
 **Rules:** never encode meaning with red/green (none exists in this palette). Every semantic difference is also carried by geometry (solid vs dashed, arrow direction) and text (labels on all markers).
 
-### 3.2 Typography
+### 3.2 Typography (ASGC-2.4)
 
-**Offline-only font stacks** (no web fonts — zero network dependency):
+**Pair** — science/engineering flavor, not exotic; offline-only system stacks (no web fonts, zero network dependency):
 
 ```css
---font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
---mono: ui-monospace, "Roboto Mono", "SF Mono", Consolas, "DejaVu Sans Mono", monospace;
+--font-display: "Roboto Condensed", "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+--font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+--font-mono: ui-monospace, "Roboto Mono", "SF Mono", Consolas, "DejaVu Sans Mono", monospace;
 ```
 
-(Chromebook ships Roboto + Roboto Mono, so the stacks resolve to native faces.)
+- **Display (header/section face):** condensed neo-grotesque with a telemetry / flight-instrument character. Used for the wordmark (+ sub-line), settings title, slider labels, all buttons (incl. `Next >`, `BURN NOW`), chip labels, and the canvas "TOP-DOWN" view tag. Resolves to a native condensed face on every target platform — **Roboto Condensed** (ChromeOS), **Avenir Next Condensed** (macOS), **Arial Narrow** (Windows); elsewhere it degrades to a plain grotesque.
+- **Body:** the system grotesque (Roboto on ChromeOS) — lesson list, hints/notes, and anything reading as prose.
+- **Mono (accent, numerals only):** readout chip values, slider values, speed segments, unit toggle, lesson numbers, M4 graph ticks, canvas info-box values.
+- **No self-hosted font is bundled:** each stack has a native system face on all three target platforms, so the app stays fully offline (SPEC: zero network deps). This is a deliberate choice — a web font would have added weight and a CDN/network dependency for no legibility gain on the target hardware.
 
-| Context | Size / weight | Notes |
+**Typescale:** minor-third scale, ratio **1.2**, base **14 px**, declared as CSS custom properties in `src/index.css` and mirrored 1:1 in `src/sim/scene.ts` (`STEP` + `canvasFont()`) so canvas and DOM share one scale:
+
+| Step | Size | Used by |
 |---|---|---|
-| Wordmark | 18 px / 700 | 16 px narrow |
-| Module tabs | 14 px / 600, numbers in mono 12 px | 11 px narrow |
-| Slider label | 14 px / 600, UPPERCASE, letter-spacing .06em | |
-| Slider value | **18 px / 700 mono**, `font-variant-numeric: tabular-nums` | |
-| Chip key | 11 px / 600 UPPERCASE letter-spacing .08em, `--text-dim` | |
-| Chip value | **16 px / 700 mono**, `tabular-nums` | 15 px narrow |
-| Speed segments | 13 px mono | |
-| Hint line | 14 px / 400 `--text-dim` | one line, dismissible |
+| `--step--2` | 10 px | reserved (none in current shell) |
+| `--step--1` | 12 px | wordmark sub, settings title, chip labels, lesson numbers (mono), speed segments (mono), unit toggle (narrow), reduced-motion note, M4 graph ticks (mono) |
+| `--step-0` | 14 px | **base** — lesson list, slider labels, buttons (incl. `Next >`), unit toggle (wide), canvas altitude line / ⊕ labels, view tag, M4 axis titles, info-box labels |
+| `--step-1` | 17 px | slider values (mono), `BURN NOW`, canvas v / A₁=A₂ / Δv labels, apogee–perigee marker labels, info-box values (mono) |
+| `--step-2` | 20 px | wordmark |
+| `--step-3` | 24 px | reserved (none in current shell) |
 
-**Canvas-drawn labels** (drawn with the canvas font stack, sizes in CSS px before DPR scaling):
+`html` keeps 16 px for unstyled body text; every visible element takes an explicit step — **except** the readout chip value, pinned at 16 px: the 3×2 grid is fixed at 330 px (300 px under 1200 px), where a 17 px mono value with 10 characters (≈92 px + 16 px chip padding) exceeds the ~96–106 px track, so 17 px cannot be guaranteed across the target font widths (Roboto Mono = 0.6 em). This is the single deliberate off-scale pin in the system.
 
-| Label | Size / weight |
+**Canvas-drawn labels** (same families + scale via `canvasFont()`):
+
+| Label | Step / weight / face |
 |---|---|
-| View badge (“TOP-DOWN”) | 18 px / 700, letter-spacing 1.5 px, in pill `#131A2E` @85% |
-| Apogee / perigee / burn labels | 16 px / 700 mono |
-| Live “v = …” label at spacecraft | 16 px / 700 mono `--yellow` |
-| “A₁ = A₂” annotation | 16 px / 600 |
-| Scale-bar caption | 14 px mono |
-| SUN / N markers | 14 px / 700 |
+| View badge (“TOP-DOWN”) | step-0 / 700 / display |
+| Apogee / perigee / burn marker labels | step-1 / 500 / body |
+| Live “v = …” label at spacecraft | step-1 / 700 / body, `--yellow` |
+| “A₁ = A₂” annotation | step-1 / 700 / body |
+| Info-box (M5/M6) labels · values | step-0 / 500 body · step-1 / 700 mono |
+| M4 graph ticks · axis titles | step--1 / 500 mono · step-0 / 600 body |
 
-Hard floor: **no canvas label below 14 px**, no key value below 16 px. Canvas text gets a 2 px dark halo (`strokeText` in `--bg-space` under `fillText`) so it stays readable over orbit lines.
+Hard floor: **no canvas label below step--1 (12 px)** (graph ticks only), no key canvas label below step-0 (14 px), no key value below step-1 (17 px). Canvas text gets a dark halo (`strokeText` under `fillText`) so it stays readable over orbit lines.
 
 ### 3.3 Spacing / radii / targets
 
@@ -200,7 +206,7 @@ Row — 44 px buttons (icon-only on narrow, `Next >` stays labeled):
 3. **Step forward** `▶` — `→` (pauses if running). Steps = 2% of the current period.
 4. **Reset** `↺` — `R` (module params → defaults, `t = 0`, paused state preserved).
 
-Speed segments (mono 13 px): `0.5× | 1× | 2× | 5× | 10×`, default `1×`. Keys `[` / `]` step down/up.
+Speed segments (mono, step--1 = 12 px): `0.5× | 1× | 2× | 5× | 10×`, default `1×`. Keys `[` / `]` step down/up.
 
 **Time scale:** `1×` = **60 simulated seconds per real second** (LEO ≈ 1.5 s/orbit, GEO ≈ 103 s/orbit; 5–10× for GEO work).
 
@@ -210,7 +216,7 @@ Segmented `km/s | km/min`, default `km/s`, key `U`. Affects every velocity reado
 
 ### 5.3 Sliders (DOM, native `<input type="range">` restyled)
 
-Anatomy: label (14 px, `--text-mid`, uppercase) left + value (18 px mono bold, white) right, track below.
+Anatomy: label (step-0 = 14 px, display face, `--text-mid`, uppercase) left + value (step-1 = 17 px mono bold, white) right, track below.
 - Track: 6 px tall, `--border` unfilled, `--cyan` filled.
 - Thumb: 20 px circle, cyan fill, 2 px white border, 4 px cyan 25% halo. (22 px on narrow/touch.)
 - **Scale types:** altitude sliders are **logarithmic** (200–36,000 km spans 2.3 decades; linear would make LEO unusable) — slider position `p = (log10(v) − log10(min)) / (log10(max) − log10(min))`; `a` and `Δv` are linear; `e` linear.
@@ -219,7 +225,7 @@ Anatomy: label (14 px, `--text-mid`, uppercase) left + value (18 px mono bold, w
 
 ### 5.4 Readout grid (control-bar row 1, right, 330 px, 3×2)
 
-Chips: 8 px radius, `--bg-panel` on a slightly darker `#0E1526` fill, key (11 px uppercase dim) over value (16 px mono bold white). Live values (position-dependent) update at **≤ 10 Hz** (throttled) to avoid flicker; all use `tabular-nums`. One chip per module may carry the `.hot` (yellow value) treatment for the module’s “money” number (T²/a³, Total Δv). Empty slots render an empty chip (stable layout).
+Chips: 8 px radius, `--bg-panel` on a slightly darker `#0E1526` fill, key (step--1 = 12 px, display face, uppercase dim) over value (16 px mono bold white — the one off-scale pin, see §3.2). Live values (position-dependent) update at **≤ 10 Hz** (throttled) to avoid flicker; all use `tabular-nums`. One chip per module may carry the `.hot` (yellow value) treatment for the module’s “money” number (T²/a³, Total Δv). Empty slots render an empty chip (stable layout).
 
 ---
 

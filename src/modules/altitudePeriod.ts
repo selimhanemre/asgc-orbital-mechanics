@@ -10,7 +10,7 @@ import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import type { CanvasInfo } from '../sim/scene'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawViewTag, EARTH_PX,
+  drawEarth, drawOrbitPath, drawCraft, drawViewTag, EARTH_PX, STEP, canvasFont,
 } from '../sim/scene'
 
 const defaults: Params = { altitude: 400 }
@@ -52,7 +52,7 @@ function drawGraph(c: CanvasInfo, x: number, y: number, w: number, h: number, al
   ctx.strokeStyle = 'rgba(255,255,255,0.12)'
   ctx.lineWidth = 1
   ctx.fillStyle = '#8a94b8'
-  ctx.font = '500 12px system-ui, sans-serif'
+  ctx.font = canvasFont(500, STEP.stepMinus1, 'mono')
   ctx.textAlign = 'center'
   for (const a of [0, 10000, 20000, 30000, 40000]) {
     const gx = x + padL + (a / ALT_MAX) * plotW
@@ -97,7 +97,7 @@ function drawGraph(c: CanvasInfo, x: number, y: number, w: number, h: number, al
 
   // axis titles
   ctx.fillStyle = '#c3cbe0'
-  ctx.font = '600 14px system-ui, sans-serif'
+  ctx.font = canvasFont(600, STEP.step0)
   ctx.textAlign = 'center'
   ctx.fillText('Altitude (km)', x + padL + plotW / 2, y + h - 7)
   ctx.save()

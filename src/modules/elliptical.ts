@@ -7,7 +7,7 @@ import { TWO_PI, periodFromSemiMajor, visViva, ellipseRadii, clampPerigee } from
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawMarker, EARTH_PX,
+  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawMarker, EARTH_PX, STEP,
 } from '../sim/scene'
 
 const defaults: Params = { a: 24395, e: 0.3 }
@@ -96,12 +96,12 @@ export const module: ModuleDef = {
     ctxT.lineTo(sx - Math.sin(nu0) * vLen, sy + Math.cos(nu0) * vLen)
     ctxT.stroke()
     ctxT.restore()
-    drawLabel(inp.top, `v=${vLabel}`, sx + 14, sy - 14, { color: '#ffd60a', size: 16, bold: true })
+    drawLabel(inp.top, `v=${vLabel}`, sx + 14, sy - 14, { color: '#ffd60a', size: STEP.step1, bold: true })
 
     const { peri, apo: apoR } = ellipseRadii(a, e)
     drawMarker(inp.top, topV.cx + peri * topV.scale, topV.cy, `PERI ${(peri - 6371).toFixed(0)}`, '#4dd0e1')
     drawMarker(inp.top, topV.cx - apoR * topV.scale, topV.cy, `APO ${(apoR - 6371).toFixed(0)}`, '#ffd60a')
-    drawLabel(inp.top, '⊕', topV.cx - 8, topV.cy, { color: '#4dd0e1', size: 14 })
+    drawLabel(inp.top, '⊕', topV.cx - 8, topV.cy, { color: '#4dd0e1', size: STEP.step0 })
     drawViewTag(inp.top, 'TOP-DOWN')
   },
 }

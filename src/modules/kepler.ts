@@ -8,7 +8,7 @@ import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
   drawEarth, drawOrbitPath, fillSweptSector, drawCraft, drawLabel, drawViewTag,
-  drawMarker, EARTH_PX,
+  drawMarker, EARTH_PX, STEP,
 } from '../sim/scene'
 
 const defaults: Params = { a: 12000, e: 0.3 }
@@ -74,7 +74,7 @@ export const module: ModuleDef = {
 
     const midNu1 = nu0 + dnu / 2
     const rMid1 = a * (1 - e * e) / (1 + e * Math.cos(midNu1))
-    drawLabel(inp.top, 'A₁=A₂', topV.cx + rMid1 * topV.scale * Math.cos(midNu1) + 20, topV.cy + rMid1 * topV.scale * Math.sin(midNu1) - 10, { color: '#ffd60a', size: 16, bold: true })
+    drawLabel(inp.top, 'A₁=A₂', topV.cx + rMid1 * topV.scale * Math.cos(midNu1) + 20, topV.cy + rMid1 * topV.scale * Math.sin(midNu1) - 10, { color: '#ffd60a', size: STEP.step1, bold: true })
 
     const sx = topV.cx + r0 * topV.scale * Math.cos(nu0)
     const sy = topV.cy + r0 * topV.scale * Math.sin(nu0)
@@ -82,7 +82,7 @@ export const module: ModuleDef = {
 
     drawMarker(inp.top, topV.cx + a * (1 - e) * topV.scale, topV.cy, 'PERI', '#4dd0e1')
     drawMarker(inp.top, topV.cx - a * (1 + e) * topV.scale, topV.cy, 'APO', '#ffd60a')
-    drawLabel(inp.top, '⊕', topV.cx - 8, topV.cy, { color: '#4dd0e1', size: 14 })
+    drawLabel(inp.top, '⊕', topV.cx - 8, topV.cy, { color: '#4dd0e1', size: STEP.step0 })
     drawViewTag(inp.top, 'TOP-DOWN')
   },
 }

@@ -7,7 +7,7 @@ import { circularRadius, circularVelocity, periodFromSemiMajor } from '../sim/en
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, EARTH_PX,
+  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, EARTH_PX, STEP,
 } from '../sim/scene'
 
 const defaults: Params = { altitude: 400 }
@@ -57,7 +57,7 @@ export const module: ModuleDef = {
     ctxT.lineTo(topV.cx, topV.cy - rKm * topV.scale)
     ctxT.stroke()
     ctxT.setLineDash([])
-    drawLabel(inp.top, `${p.altitude} km`, topV.cx + 8, topV.cy - (6371 + rKm) / 2 * topV.scale, { color: '#fff', size: 14 })
+    drawLabel(inp.top, `${p.altitude} km`, topV.cx + 8, topV.cy - (6371 + rKm) / 2 * topV.scale, { color: '#fff', size: STEP.step0 })
     ctxT.restore()
 
     const sx = topV.cx + rKm * topV.scale * Math.cos(nu)
@@ -65,7 +65,7 @@ export const module: ModuleDef = {
     drawCraft(inp.top, sx, sy, nu + Math.PI / 2)
 
     const vLabel = inp.unit === 'kms' ? `${circularVelocity(rKm).toFixed(3)} km/s` : `${(circularVelocity(rKm) * 60).toFixed(1)} km/min`
-    drawLabel(inp.top, `v=${vLabel}`, sx + 14, sy - 14, { color: '#ffd60a', size: 16, bold: true })
+    drawLabel(inp.top, `v=${vLabel}`, sx + 14, sy - 14, { color: '#ffd60a', size: STEP.step1, bold: true })
     drawViewTag(inp.top, 'TOP-DOWN')
   },
 }

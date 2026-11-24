@@ -35,6 +35,39 @@ export const FRAME_MARGIN = 0.14
 /** Fixed pixel radius of Earth (never moves or rescales with the sliders). */
 export const EARTH_PX = 16
 
+/* ── Typography (ASGC-2.4 — docs/DESIGN.md §3.2) ──────────────────────
+ * Canvas text follows the SAME family + scale system as the DOM
+ * (src/index.css tokens) so HUD labels and chips read as one system.
+ * These constants are the mirror of the CSS custom properties; keep
+ * them in lockstep when the scale changes.
+ */
+export const FONT_DISPLAY =
+  '"Roboto Condensed", "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif'
+export const FONT_BODY =
+  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+/** Canvas-safe mono stack (no `ui-monospace` keyword — canvas font
+ *  parsing is stricter than CSS). */
+export const FONT_MONO =
+  '"Roboto Mono", "SF Mono", Consolas, "DejaVu Sans Mono", monospace'
+
+/** Explicit typescale: minor third (ratio 1.2), base 14px — mirrors --step-*. */
+export const STEP = {
+  stepMinus2: 10,
+  stepMinus1: 12,
+  step0: 14,
+  step1: 17,
+  step2: 20,
+  step3: 24,
+} as const
+
+export type TypeFace = 'display' | 'body' | 'mono'
+
+/** Build a canvas `ctx.font` string from weight + scale step + face. */
+export function canvasFont(weight: number | string, step: number, face: TypeFace = 'body'): string {
+  const stack = face === 'display' ? FONT_DISPLAY : face === 'mono' ? FONT_MONO : FONT_BODY
+  return `${weight} ${step}px ${stack}`
+}
+
 /**
  * Fixed km -> px scale that fits MAX_ORBIT_KM inside the canvas with
  * FRAME_MARGIN of the half-min-dimension as breathing room.
@@ -243,12 +276,12 @@ export function drawLabel(
   text: string,
   x: number,
   y: number,
-  opts: { color?: string; size?: number; align?: CanvasTextAlign; bold?: boolean } = {},
+  opts: { color?: string; size?: number; align?: CanvasTextAlign; bold?: boolean; face?: TypeFace } = {},
 ): void {
   const { ctx } = c
-  const size = opts.size ?? 16
+  const size = opts.size ?? STEP.step1
   ctx.save()
-  ctx.font = `${opts.bold ? '700' : '500'} ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`
+  ctx.font = canvasFont(opts.bold ? 700 : 500, size, opts.face ?? 'body')
   ctx.textAlign = opts.align ?? 'left'
   ctx.textBaseline = 'middle'
   ctx.lineWidth = 4
@@ -282,7 +315,7 @@ export function drawMarker(
   ctx.fill()
   ctx.stroke()
   ctx.restore()
-  drawLabel(c, label, x + 12, y, { color, size: 15 })
+  drawLabel(c, label, x + 12, y, { color, size: STEP.step1 })
 }
 
 /** Rounded info-box of text lines, anchored top-left at (x, y). */
@@ -315,7 +348,7 @@ export function drawInfoBox(
   ctx.fill()
   ctx.stroke()
   ctx.globalAlpha = 1
-  ctx.font = '500 15px system-ui, -apple-system, "Segoe UI", sans-serif'
+  ctx.font = canvasFont(500, STEP.step0)
   lines.forEach((ln, i) => {
     const ty = y + padY + lineH * i + lineH / 2
     ctx.textAlign = 'left'
@@ -324,14 +357,14 @@ export function drawInfoBox(
     ctx.fillText(ln.label, x + padX, ty)
     ctx.textAlign = 'right'
     ctx.fillStyle = ln.color ?? '#f2f6ff'
-    ctx.font = '700 16px system-ui, -apple-system, "Segoe UI", sans-serif'
+    ctx.font = canvasFont(700, STEP.step1, 'mono')
     ctx.fillText(ln.value, x + width - padX, ty)
-    ctx.font = '500 15px system-ui, -apple-system, "Segoe UI", sans-serif'
+    ctx.font = canvasFont(500, STEP.step0)
   })
   ctx.restore()
 }
 
 /** View tag ("TOP-DOWN") in the corner. */
 export function drawViewTag(c: CanvasInfo, text: string): void {
-  drawLabel(c, text, 14, 18, { color: '#8fa3cc', size: 13, bold: true })
+  drawLabel(c, text, 14, 18, { color: '#8fa3cc', size: STEP.step0, bold: true, face: 'display' })
 }

@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  font: 16px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font: 16px/1.45 var(--font-body);
   -webkit-font-smoothing: antialiased;
   --bg-space: #0B1020;
   --bg-panel: #131A2E;
@@ -12,6 +12,27 @@
   --cyan: #4DD0E1;
   --yellow: #FFD60A;
   --amber: #FFB300;
+
+  /* ── Typography (ASGC-2.4 — docs/DESIGN.md §3.2) ────────────────────
+     Display: condensed neo-grotesque — telemetry / flight-instrument
+     flavor. Body: system grotesque. Mono: numerals only. All system
+     stacks (no web fonts — fully offline; ChromeOS resolves the
+     display face to native Roboto Condensed, macOS to Avenir Next
+     Condensed, Windows to Arial Narrow). */
+  --font-display: "Roboto Condensed", "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Roboto Mono", "SF Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* Explicit typescale: minor third (ratio 1.2), base 14px.
+     step-0 is the app's workhorse label size; html keeps 16px for
+     text that takes no explicit step. Canvas text mirrors this scale
+     in src/sim/scene.ts (STEP). */
+  --step--2: 10px;
+  --step--1: 12px;
+  --step-0: 14px;
+  --step-1: 17px;
+  --step-2: 20px;
+  --step-3: 24px;
 }
 
 body {
