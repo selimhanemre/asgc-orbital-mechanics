@@ -10,7 +10,7 @@ import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import type { CanvasInfo } from '../sim/scene'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawViewTag,
+  drawEarth, drawOrbitPath, drawCraft, drawViewTag, EARTH_PX,
 } from '../sim/scene'
 
 const defaults: Params = { altitude: 400 }
@@ -136,8 +136,8 @@ export const module: ModuleDef = {
     const T = periodFromSemiMajor(r)
     const nu = meanAnomaly(inp.time, T)
 
-    const topV = makeView(inp.top, r)
-    drawEarth(inp.top, topV.cx, topV.cy, 6371 * topV.scale)
+    const topV = makeView(inp.top)
+    drawEarth(inp.top, topV.cx, topV.cy, EARTH_PX)
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, r, 0, { color: '#4dd0e1' })
     const sx = topV.cx + r * topV.scale * Math.cos(nu)
     const sy = topV.cy + r * topV.scale * Math.sin(nu)

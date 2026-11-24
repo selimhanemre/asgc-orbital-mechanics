@@ -7,7 +7,7 @@ import { circularRadius, circularVelocity, periodFromSemiMajor } from '../sim/en
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag,
+  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, EARTH_PX,
 } from '../sim/scene'
 
 const defaults: Params = { altitude: 400 }
@@ -42,8 +42,8 @@ export const module: ModuleDef = {
     const nu = meanAnomaly(inp.time, T)
 
     // TOP-DOWN
-    const topV = makeView(inp.top, rKm)
-    drawEarth(inp.top, topV.cx, topV.cy, 6371 * topV.scale)
+    const topV = makeView(inp.top)
+    drawEarth(inp.top, topV.cx, topV.cy, EARTH_PX)
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, rKm, 0, { color: '#4dd0e1' })
 
     // Altitude line
@@ -53,7 +53,7 @@ export const module: ModuleDef = {
     ctxT.lineWidth = 2
     ctxT.setLineDash([6, 6])
     ctxT.beginPath()
-    ctxT.moveTo(topV.cx, topV.cy - 6371 * topV.scale)
+    ctxT.moveTo(topV.cx, topV.cy - EARTH_PX)
     ctxT.lineTo(topV.cx, topV.cy - rKm * topV.scale)
     ctxT.stroke()
     ctxT.setLineDash([])

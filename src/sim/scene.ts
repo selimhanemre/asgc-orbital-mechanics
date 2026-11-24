@@ -9,10 +9,39 @@ export interface CanvasInfo {
   h: number
 }
 
-/** km -> px scale that fits a radius of rMax km with a margin. */
-export function fitScale(w: number, h: number, rMaxKm: number, margin = 0.14): number {
+/**
+ * Fixed scene scale (ASGC-2.2).
+ *
+ * The km→px scale is derived ONCE from the largest orbit reachable by the
+ * sliders of ANY module — not refit per frame from the current orbit. This
+ * pins Earth at the canvas center at a fixed pixel radius (EARTH_PX), so
+ * dragging sliders grows/shrinks the orbital lines while Earth stays put.
+ *
+ * MAX_ORBIT_KM = max of a·(1+e) over every module's slider range:
+ *   kepler:          42000 km a × (1 + 0.50 e)   = 63000 km
+ *   circular:        6371 + 36000                = 42371 km
+ *   elliptical:      42000 km a × (1 + 0.95 e)   = 81900 km  ← governing
+ *   altitudePeriod:  6371 + 400 (fixed, no slider) = 6771 km
+ *   hohmann:         6371 + 36000                = 42371 km
+ *   launch:          6371 + 200 initial state; apoapsis is shaped by the burn
+ *                    BUTTONS, not sliders, and can exceed the fixed frame
+ *                    after enough prograde burns (expected; Reset restores).
+ */
+export const MAX_ORBIT_KM = 81900
+
+/** Fraction of the half-min-dimension kept as margin around the max orbit. */
+export const FRAME_MARGIN = 0.14
+
+/** Fixed pixel radius of Earth (never moves or rescales with the sliders). */
+export const EARTH_PX = 16
+
+/**
+ * Fixed km -> px scale that fits MAX_ORBIT_KM inside the canvas with
+ * FRAME_MARGIN of the half-min-dimension as breathing room.
+ */
+export function fixedScale(w: number, h: number): number {
   const minDim = Math.min(w, h)
-  return ((minDim / 2) * (1 - margin)) / rMaxKm
+  return ((minDim / 2) * (1 - FRAME_MARGIN)) / MAX_ORBIT_KM
 }
 
 /** Deterministic starfield (same stars for a given size bucket). */

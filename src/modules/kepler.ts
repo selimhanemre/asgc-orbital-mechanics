@@ -8,7 +8,7 @@ import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
   drawEarth, drawOrbitPath, fillSweptSector, drawCraft, drawLabel, drawViewTag,
-  drawMarker,
+  drawMarker, EARTH_PX,
 } from '../sim/scene'
 
 const defaults: Params = { a: 12000, e: 0.3 }
@@ -56,8 +56,7 @@ export const module: ModuleDef = {
   draw(inp: DrawInput, p: Params): void {
     const { a, e } = p
     const T = periodFromSemiMajor(a)
-    const maxR = a * (1 + e)
-    const topV = makeView(inp.top, maxR)
+    const topV = makeView(inp.top)
 
     const M = meanAnomaly(inp.time, T)
     const E0 = solveKepler(M, e)
@@ -65,7 +64,7 @@ export const module: ModuleDef = {
     const r0 = a * (1 - e * Math.cos(E0))
 
     // TOP-DOWN
-    drawEarth(inp.top, topV.cx, topV.cy, 6371 * topV.scale)
+    drawEarth(inp.top, topV.cx, topV.cy, EARTH_PX)
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, a, e, { color: '#4dd0e1' })
 
     // Equal-area sectors

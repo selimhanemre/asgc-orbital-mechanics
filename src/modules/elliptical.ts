@@ -7,7 +7,7 @@ import { TWO_PI, periodFromSemiMajor, visViva, ellipseRadii, clampPerigee } from
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawMarker,
+  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawMarker, EARTH_PX,
 } from '../sim/scene'
 
 const defaults: Params = { a: 24395, e: 0.3 }
@@ -68,8 +68,7 @@ export const module: ModuleDef = {
     _simTime = inp.time
     const { a, e } = p
     const T = periodFromSemiMajor(a)
-    const maxR = a * (1 + e)
-    const topV = makeView(inp.top, maxR)
+    const topV = makeView(inp.top)
 
     const M = meanAnomaly(inp.time, T)
     const E0 = solveKepler(M, e)
@@ -79,7 +78,7 @@ export const module: ModuleDef = {
     const vLabel = inp.unit === 'kms' ? `${v0.toFixed(3)} km/s` : `${(v0 * 60).toFixed(1)} km/min`
 
     // TOP-DOWN
-    drawEarth(inp.top, topV.cx, topV.cy, 6371 * topV.scale)
+    drawEarth(inp.top, topV.cx, topV.cy, EARTH_PX)
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, a, e, { color: '#4dd0e1' })
 
     const sx = topV.cx + r0 * topV.scale * Math.cos(nu0)

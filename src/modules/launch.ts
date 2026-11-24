@@ -7,7 +7,7 @@ import { periodFromSemiMajor, elementsFromState, applyImpulse, circularState } f
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawViewTag, drawMarker, drawInfoBox,
+  drawEarth, drawOrbitPath, drawCraft, drawViewTag, drawMarker, drawInfoBox, EARTH_PX,
 } from '../sim/scene'
 
 const defaults: Params = { dv: 0.5, prograde: 1 }
@@ -58,8 +58,9 @@ export const module: ModuleDef = {
   draw(inp: DrawInput, p: Params): void {
     const el = elementsFromState(_state)
     const rMag = Math.hypot(_state.r.x, _state.r.y)
-    const maxR = el.apo !== null ? el.apo : Math.max(rMag * 1.5, 20000)
-    const topV = makeView(inp.top, maxR)
+    // Fixed scale: apoapsis shaped by burn buttons (not sliders) may exceed
+    // the frame after many prograde burns — expected; Reset restores.
+    const topV = makeView(inp.top)
 
     // Ghost orbits
     for (const ghost of _ghostOrbits) {
@@ -67,7 +68,7 @@ export const module: ModuleDef = {
     }
 
     // TOP-DOWN
-    drawEarth(inp.top, topV.cx, topV.cy, 6371 * topV.scale)
+    drawEarth(inp.top, topV.cx, topV.cy, EARTH_PX)
     const orbitR = el.type === 'circular' ? el.peri : el.a
     const orbitE = el.type === 'circular' ? 0 : el.e
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, orbitR, orbitE, { color: '#4dd0e1' })

@@ -7,7 +7,7 @@ import { circularRadius, periodFromSemiMajor } from '../sim/engine'
 import type { ModuleDef, Params, ReadoutLine, DrawInput } from './types'
 import { meanAnomaly, makeView } from './common'
 import {
-  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawInfoBox,
+  drawEarth, drawOrbitPath, drawCraft, drawLabel, drawViewTag, drawInfoBox, EARTH_PX,
 } from '../sim/scene'
 
 const defaults: Params = { startAlt: 400, targetAlt: 35786 }
@@ -50,7 +50,6 @@ export const module: ModuleDef = {
     const r2 = circularRadius(Math.max(p.targetAlt, p.startAlt + 100))
     const aT = (r1 + r2) / 2
     const eT = (r2 - r1) / (r1 + r2)
-    const maxR = r2
     const v1 = getCircularV(r1)
     const v2 = getCircularV(r2)
     const vTPeri = Math.sqrt(398600 * (2 / r1 - 1 / aT))
@@ -74,8 +73,8 @@ export const module: ModuleDef = {
       nu = meanAnomaly(cycleTime - T1 - tTransfer, periodFromSemiMajor(r2))
     }
 
-    const topV = makeView(inp.top, maxR)
-    drawEarth(inp.top, topV.cx, topV.cy, 6371 * topV.scale)
+    const topV = makeView(inp.top)
+    drawEarth(inp.top, topV.cx, topV.cy, EARTH_PX)
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, r1, 0, { color: '#4dd0e1' })
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, r2, 0, { color: '#4dd0e1' })
     drawOrbitPath(inp.top, topV.cx, topV.cy, topV.scale, aT, eT, { color: '#ffb300', dashed: true, width: 3 })

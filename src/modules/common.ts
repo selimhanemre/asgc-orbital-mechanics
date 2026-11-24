@@ -1,7 +1,7 @@
 // Shared helpers for the learning modules: view mapping, unit formatting,
 // phase computation.
 
-import { fitScale, drawEarth, drawOrbitPath } from '../sim/scene'
+import { fixedScale, drawEarth, drawOrbitPath, EARTH_PX } from '../sim/scene'
 import type { CanvasInfo } from '../sim/scene'
 import type { Unit } from './types'
 
@@ -36,9 +36,14 @@ export interface View {
   X: (xKm: number, yKm: number) => readonly [number, number]
 }
 
-/** Build a view mapping for one canvas. rMaxKm = largest radius to fit. */
-export function makeView(c: CanvasInfo, rMaxKm: number): View {
-  const scale = fitScale(c.w, c.h, rMaxKm)
+/**
+ * Build a view mapping for one canvas.
+ * The scale is FIXED (see fixedScale / MAX_ORBIT_KM in sim/scene): it does
+ * NOT depend on the current orbit, so Earth stays pinned at the center and
+ * orbital lines grow/shrink with the sliders instead of the scene refitting.
+ */
+export function makeView(c: CanvasInfo): View {
+  const scale = fixedScale(c.w, c.h)
   const cx = c.w / 2
   const cy = c.h / 2
   return {
@@ -55,16 +60,10 @@ export function drawBaseScene(
   v: View,
   orbit: { a: number; e: number; color?: string; dashed?: boolean; width?: number },
 ): void {
-  const earthPx = Math.max(5, R_EARTH_PX(v))
-  drawEarth(v.c, v.cx, v.cy, earthPx)
+  drawEarth(v.c, v.cx, v.cy, EARTH_PX)
   drawOrbitPath(v.c, v.cx, v.cy, v.scale, orbit.a, orbit.e, {
     color: orbit.color,
     dashed: orbit.dashed,
     width: orbit.width,
   })
-}
-
-/** Pixel radius of Earth consistent with the km scale of the view. */
-export function R_EARTH_PX(v: View): number {
-  return 6371 * v.scale
 }

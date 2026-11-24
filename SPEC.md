@@ -34,9 +34,9 @@ Vite + React + TypeScript, static build, GitHub Pages.
 
 ## Visualization
 
-- 2D only, dual view (top-down + side, synced animation)
-- Side-by-side on desktop, stacked/toggle on narrow screens
-- canvas 2D
+- 2D only, single top-down canvas (side view removed in ASGC-2.1)
+- Canvas 2D; Earth pinned at canvas center at a fixed pixel radius (`EARTH_PX`) — it never moves or rescales while sliders are dragged
+- **Fixed scene scale** (ASGC-2.2): km→px scale is computed once per canvas size as `fixedScale(w, h) = (min(w,h)/2 × (1 − FRAME_MARGIN)) / MAX_ORBIT_KM` (FRAME_MARGIN = 0.14, `src/sim/scene.ts`). `MAX_ORBIT_KM = 81,900 km` is the largest slider-reachable a·(1+e) across all modules (elliptical at a = 42,000, e = 0.95). Ellipses draw at `a·scale`, `b·scale` from the fixed Earth center, so orbits grow/shrink with the sliders and the largest orbit always fits the canvas with margin — no per-frame refit
 - Real constants (μ=398600 km³/s², R⊕=6371 km)
 - Real units with km/s↔km/min toggle
 - Sliders clamped to physical ranges (e.g. altitude 200–36,000 km)
